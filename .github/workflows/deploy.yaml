@@ -33,7 +33,7 @@ jobs:
 
       - name: Run chart-releaser
         # uses: gh4-io/chart-releaser-action@main
-        use: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@v1.5.0
         with:
           charts_dir: .
         env:

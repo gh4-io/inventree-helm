@@ -1,0 +1,35 @@
+apiVersion: v1
+entries:
+  inventree:
+  - apiVersion: v2
+    appVersion: 0.10.0
+    created: "2023-02-22T18:31:18.44548573Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: Open-source Inventory Management System
+    digest: 31a9e635f20010392901849a85ef37a0319f25870ca7f9a9db2b61dc8639a005
+    home: https://gitlab.com/playground254/inventree-home
+    icon: https://gitlab.com/playground254/inventree-home/media/icon.png
+    keywords:
+    - inventree
+    - asset
+    - management
+    - inventory
+    - web
+    kubeVersion: '>=1.16.0-0'
+    maintainers:
+    - email: chrispnugget88@yahoo.com
+      name: jason
+    name: inventree
+    sources:
+    - https://github.com/inventree/InvenTree
+    - https://gitlab.com/playground254/inventree-home
+    type: application
+    urls:
+    - https://github.com/gh4-io/inventree-helm/releases/download/inventree-0.0.2/inventree-0.0.2.tgz
+    version: 0.0.2
+generated: "2023-02-22T18:31:18.44549643Z"

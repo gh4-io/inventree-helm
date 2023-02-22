@@ -1,0 +1,28 @@
+apiVersion: v2
+name: inventree
+description: "Open-source Inventory Management System"
+type: application
+version: 0.0.1-alpha
+appVersion: 0.8.1
+keywords:
+  - inventree
+  - asset
+  - management
+  - inventory
+  - web
+sources:
+  - https://github.com/inventree/InvenTree
+  - https://gitlab.com/playground254/inventree-home
+maintainers:
+  - name: jason
+    email: chrispnugget88@yahoo.com
+dependencies: 
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 2.x.x
+home: https://gitlab.com/playground254/inventree-home
+icon: https://gitlab.com/playground254/inventree-home/media/icon.png
+kubeVersion: ">=1.16.0-0"
+annotations: {}

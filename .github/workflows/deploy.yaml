@@ -28,7 +28,7 @@ jobs:
         uses: azure/setup-helm@v3
 
       - name: Run chart-releaser
-        uses: gh4.io/chart-releaser-action@main
+        uses: gh4-io/chart-releaser-action@main
         with:
           charts_dir: .
         env:

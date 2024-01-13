@@ -72,7 +72,7 @@ workers:
 
   ## @param workers.image.registry [default: REGISTRY_NAME] inventree worker image registry
   ## @param workers.image.repository [default: REPOSITORY_NAME/inventree worker] inventree worker image repository
-  ## @skip image.tag inventree worker image tag (immutable tags are recommended)
+  ## @skip workers.image.tag inventree worker image tag (immutable tags are recommended)
   ## @param workers.image.digest inventree worker image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   ## @param workers.image.pullPolicy inventree worker image pull policy
   ## @param workers.image.pullSecrets Specify docker-registry secret names as an array
@@ -321,7 +321,7 @@ redis:
 
   ## @param redis.image.registry [default: REGISTRY_NAME] Redis&reg; image registry
   ## @param redis.image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
-  ## @skip image.tag Redis&reg; image tag (immutable tags are recommended)
+  ## @param redis.image.tag Redis&reg; image tag (immutable tags are recommended)
   ## @param redis.image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   ## @param redis.image.pullPolicy Redis&reg; image pull policy
   ## @param redis.image.pullSecrets Redis&reg; image pull secrets
@@ -381,7 +381,7 @@ proxy:
   replicaCount: 1
   ## @param proxy.image.registry [default: REGISTRY_NAME] NGINX image registry
   ## @param proxy.image.repository [default: REPOSITORY_NAME/nginx] NGINX image repository
-  ## @skip image.tag NGINX image tag (immutable tags are recommended)
+  ## @skip proxy.image.tag NGINX image tag (immutable tags are recommended)
   ## @param proxy.image.digest NGINX image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   ## @param proxy.image.pullPolicy NGINX image pull policy
   ## @param proxy.image.pullSecrets Specify docker-registry secret names as an array

@@ -76,7 +76,6 @@ workers:
   ## @param workers.image.digest inventree worker image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
   ## @param workers.image.pullPolicy inventree worker image pull policy
   ## @param workers.image.pullSecrets Specify docker-registry secret names as an array
-  ## @param workers.image.debug Set to true if you would like to see extra information on logs
   ##
   image:
     registry: ""

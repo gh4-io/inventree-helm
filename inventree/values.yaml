@@ -53,7 +53,7 @@ affinity: {}
 ## @section Inventree Server parameters
 ## Inventree server configurations
 ##
-inventree:
+master:
   ## @param master.image.registry [default: REGISTRY_NAME] Inventree image registry
   ## @param master.image.repository [default: REPOSITORY_NAME/jupyterhub] Inventree image repository
   ## @skip master.image.tag Inventree image tag (immutable tags are recommended)

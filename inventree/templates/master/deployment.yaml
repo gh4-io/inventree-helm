@@ -27,12 +27,6 @@ spec:
         {{- if .Values.master.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.master.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if empty .Values.master.existingConfigmap }}
-        checksum/hub-config: {{ include (print $.Template.BasePath "/hub/configmap.yaml") . | sha256sum }}
-        {{- end }}
-        {{- if empty .Values.master.existingSecret }}
-        checksum/hub-secret: {{ include (print $.Template.BasePath "/hub/secret.yaml") . | sha256sum }}
-        {{- end }}
       labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
         app.kubernetes.io/component: master
         app.kubernetes.io/part-of: inventree
@@ -42,12 +36,12 @@ spec:
       {{- if .Values.master.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.master.hostAliases "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.master.affinity }}
-      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.master.affinity "context" $) | nindent 8 }}
+      {{- if or .Values.affinity .Values.master.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" (coalesce .Values.master.affinity .Values.affinity) "context" $) | nindent 8 }}
       {{- else }}
       affinity:
-        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAffinityPreset "component" "hub" "customLabels" $podLabels "context" $) | nindent 10 }}
-        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAntiAffinityPreset "component" "hub" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAntiAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
         nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.master.nodeAffinityPreset.type "key" .Values.master.nodeAffinityPreset.key "values" .Values.master.nodeAffinityPreset.values) | nindent 10 }}
       {{- end }}
       {{- if .Values.master.nodeSelector }}

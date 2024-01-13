@@ -23,6 +23,24 @@ fullnameOverride: ""
 commonLabels: {}
 ## @param commonAnnotations Add annotations to all the deployed resources
 commonAnnotations: {}
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: []
+## Enable diagnostic mode in the deployment(s)/daemonset(s)
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the the deployment(s)/daemonset(s)
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the the deployment(s)/daemonset(s)
+  ##
+  args:
+    - infinity
+
 
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 ## @param tolerations Tolerations for pod assignment
@@ -32,15 +50,414 @@ tolerations: []
 ## @param affinity Affinity for pod assignment
 affinity: {}
 
-## %%
-## @param imageRegistry Container registry to use for all Inventree images
-imageRegistry: ghcr.io
-## %%
-
 ## @section Inventree parameters
 ##
 
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+inventree:
+  ## @param inventree.image.registry [default: REGISTRY_NAME] Inventree image registry
+  ## @param inventree.image.repository [default: REPOSITORY_NAME/jupyterhub] Inventree image repository
+  ## @skip inventree.image.tag Inventree image tag (immutable tags are recommended)
+  ## @param inventree.image.digest Inventree image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param inventree.image.pullPolicy Inventree image pull policy
+  ## @param inventree.image.pullSecrets Inventree image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/jupyterhub
+    tag: 4.0.2-debian-11-r68
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##  - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param inventree.baseUrl Inventree base URL
+  ##
+  baseUrl: /
+  ## @param inventree.adminUser Inventree Dummy authenticator admin user
+  ##
+  adminUser: user
+  ## @param inventree.password Inventree Dummy authenticator password
+  ##
+  password: ""
+  ## @param inventree.existingSecret Name of a secret with the application password
+  ##
+  existingSecret: ""
+  ## @param inventree.services JupyterHub services interacting with the JupyterHub API
+  ## ref: https://z2jh.jupyter.org/en/latest/administrator/services.html
+  ## e.g:
+  ## services:
+  ##   service-admin:
+  ##     apiToken: XXXXXXXXXXXXXXXXXXX
+  ##     admin: true
+  services: {}
+  ## Configuration file passed to the inventree. This will be used by the jupyterhub_config.py file
+  ## This configuration uses the values for the `singleuser` section. In the upstream chart the
+  ## values.yaml file is mounted in the inventree container. This is chart, we tried to separate both
+  ## configuration so we could follow the Bitnami value standards
+  ## @param inventree.configuration [string] Inventree configuration file (to be used by jupyterhub_config.py)
+  ##
+  configuration: ""
+  ## @param inventree.existingConfigmap Configmap with Inventree init scripts (replaces the scripts in templates/inventree/configmap.yml)
+  ##
+  existingConfigmap: ""
+  ## @param inventree.existingSecret Secret with inventree configuration (replaces the inventree.configuration value) and proxy token
+  ##
+  existingSecret: ""
+  ## @param inventree.command Override Inventree default command
+  ##
+  command: []
+  ## @param inventree.args Override Inventree default args
+  ##
+  args: []
+  ## @param inventree.extraEnvVars Add extra environment variables to the Inventree container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param inventree.extraEnvVarsCM Name of existing ConfigMap containing extra env vars
+  ##
+  extraEnvVarsCM: ""
+  ## @param inventree.extraEnvVarsSecret Name of existing Secret containing extra env vars
+  ##
+  extraEnvVarsSecret: ""
+  ## @param inventree.containerPorts.http Inventree container port
+  ##
+  containerPorts:
+    http: 1337
+  ## Configure extra options for Inventree containers' liveness, readiness and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param inventree.startupProbe.enabled Enable startupProbe on Inventree containers
+  ## @param inventree.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param inventree.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param inventree.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param inventree.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param inventree.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param inventree.livenessProbe.enabled Enable livenessProbe on Inventree containers
+  ## @param inventree.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param inventree.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param inventree.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param inventree.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param inventree.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param inventree.readinessProbe.enabled Enable readinessProbe on Inventree containers
+  ## @param inventree.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param inventree.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param inventree.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param inventree.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param inventree.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param inventree.customStartupProbe Override default startup probe
+  ##
+  customStartupProbe: {}
+  ## @param inventree.customLivenessProbe Override default liveness probe
+  ##
+  customLivenessProbe: {}
+  ## @param inventree.customReadinessProbe Override default readiness probe
+  ##
+  customReadinessProbe: {}
+  ## Inventree resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param inventree.resources.limits The resources limits for the Inventree containers
+  ## @param inventree.resources.requests The requested resources for the Inventree containers
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## inventree containers' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param inventree.containerSecurityContext.enabled Enabled containers' Security Context
+  ## @param inventree.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+  ## @param inventree.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+  ## @param inventree.containerSecurityContext.privileged Set container's Security Context privileged
+  ## @param inventree.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+  ## @param inventree.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+  ## @param inventree.containerSecurityContext.capabilities.drop List of capabilities to be dropped
+  ## @param inventree.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
+  ## inventree pods' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param inventree.podSecurityContext.enabled Enabled Inventree pods' Security Context
+  ## @param inventree.podSecurityContext.fsGroup Set Inventree pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  ## @param inventree.lifecycleHooks LifecycleHooks for the Inventree container to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param inventree.hostAliases Add deployment host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param inventree.podLabels Add extra labels to the Inventree pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param inventree.podAnnotations Add extra annotations to the Inventree pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Pod affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ## @param inventree.podAffinityPreset Pod affinity preset. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  podAffinityPreset: ""
+  ## Pod anti-affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## @param inventree.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  podAntiAffinityPreset: soft
+  ## Node affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## @param inventree.nodeAffinityPreset.type Node affinity preset type. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`
+  ## @param inventree.nodeAffinityPreset.key Node label key to match. Ignored if `inventree.affinity` is set
+  ## @param inventree.nodeAffinityPreset.values Node label values to match. Ignored if `inventree.affinity` is set
+  ##
+  nodeAffinityPreset:
+    type: ""
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param inventree.affinity  Affinity for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+  ## @param inventree.nodeSelector Node labels for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param inventree.tolerations Tolerations for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## @param inventree.topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param inventree.priorityClassName Priority Class Name
+  ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  ##
+  priorityClassName: ""
+  ## @param inventree.schedulerName Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param inventree.terminationGracePeriodSeconds Seconds Inventree pod needs to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param inventree.updateStrategy.type Update strategy - only really applicable for deployments with RWO PVs attached
+  ## @param inventree.updateStrategy.rollingUpdate Inventree deployment rolling update configuration parameters
+  ## If replicas = 1, an update can get "stuck", as the previous pod remains attached to the
+  ## PV, and the "incoming" pod can never start. Changing the strategy to "Recreate" will
+  ## terminate the single previous pod, so that the new, incoming pod can attach to the PV
+  ##
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate: {}
+  ## @param inventree.extraVolumes Optionally specify extra list of additional volumes for Inventree pods
+  ##
+  extraVolumes: []
+  ## @param inventree.extraVolumeMounts Optionally specify extra list of additional volumeMounts for Inventree container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param inventree.initContainers Add additional init containers to the Inventree pods
+  ## Example:
+  ## initContainers:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  initContainers: []
+  ## @param inventree.sidecars Add additional sidecar containers to the Inventree pod
+  ## Example:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param inventree.pdb.create Deploy Inventree PodDisruptionBudget
+  ## @param inventree.pdb.minAvailable Set minimum available inventree instances
+  ## @param inventree.pdb.maxUnavailable Set maximum available inventree instances
+  ##
+  pdb:
+    create: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+  ## @section Inventree RBAC parameters
+
+  ## ServiceAccount parameters
+  ##
+  serviceAccount:
+    ## @param inventree.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: true
+    ## @param inventree.serviceAccount.name Override Inventree service account name
+    ## If not set and create is true, a name is generated using the fullname template
+    ##
+    name: ""
+    ## @param inventree.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ## Can be set to false if pods using this serviceAccount do not need to use K8s API
+    ##
+    automountServiceAccountToken: true
+    ## @param inventree.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+  ## RBAC resources
+  ##
+  rbac:
+    ## @param inventree.rbac.create Specifies whether RBAC resources should be created
+    ##
+    create: true
+    ## @param inventree.rbac.rules Custom RBAC rules to set
+    ## e.g:
+    ## rules:
+    ##   - apiGroups:
+    ##       - ""
+    ##     resources:
+    ##       - pods
+    ##     verbs:
+    ##       - get
+    ##       - list
+    ##
+    rules: []
+
+  ## @section Inventree Traffic Exposure Parameters
+
+  ## Network policy
+  ##
+  networkPolicy:
+    ## @param inventree.networkPolicy.enabled Deploy Inventree network policies
+    ##
+    enabled: true
+    ## @param inventree.networkPolicy.allowInterspaceAccess Allow communication between pods in different namespaces
+    ##
+    allowInterspaceAccess: true
+    ## @param inventree.networkPolicy.extraIngress Add extra ingress rules to the NetworkPolicy
+    ##
+    extraIngress: ""
+    ## @param inventree.networkPolicy.extraEgress [string] Add extra ingress rules to the NetworkPolicy
+    ##
+    extraEgress: |
+      ## Inventree --> Any IP:PORT
+      ##
+      - to:
+  service:
+    ## @param inventree.service.type Inventree service type
+    ##
+    type: ClusterIP
+    ## @param inventree.service.ports.http Inventree service HTTP port
+    ##
+    ports:
+      http: 1337
+    ## @param inventree.service.nodePorts.http NodePort for the HTTP endpoint
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http: ""
+    ## @param inventree.service.sessionAffinity Control where client requests go, to the same pod or round-robin
+    ## Values: ClientIP or None
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    ##
+    sessionAffinity: None
+    ## @param inventree.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+    ## @param inventree.service.clusterIP Inventree service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP: ""
+    ## @param inventree.service.loadBalancerIP Inventree service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP: ""
+    ## @param inventree.service.loadBalancerSourceRanges Inventree service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param inventree.service.externalTrafficPolicy Inventree service external traffic policy
+    ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param inventree.service.annotations Additional custom annotations for Inventree service
+    ##
+    annotations: {}
+    ## @param inventree.service.extraPorts Extra port to expose on Inventree service
+    ##
+    extraPorts: []
+
+
+
+## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 ## @section Workers parameters
@@ -553,7 +970,7 @@ proxy:
     ## @param proxy.service.externalTrafficPolicy Enable client source IP preservation
     ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
     ##
-    externalTrafficPolicy: Cluster
+    externalTrafficPolicy: Local
 
 
 

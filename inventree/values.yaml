@@ -32,10 +32,13 @@ tolerations: []
 ## @param affinity Affinity for pod assignment
 affinity: {}
 
+## %%
 ## @param imageRegistry Container registry to use for all Inventree images
 imageRegistry: ghcr.io
+## %%
 
 ## @section Inventree parameters
+##
 
 ## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -238,42 +241,42 @@ postgresql:
       scripts: {}
 
     persistence:
-    ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
-    ##
-    enabled: true
-    ## @param primary.persistence.existingClaim Name of an existing PVC to use
-    ##
-    existingClaim: ""
-    ## @param primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    storageClass: ""
-    ## @param primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
-    ##
-    accessModes:
-      - ReadWriteOnce
-    ## @param primary.persistence.size PVC Storage Request for PostgreSQL volume
-    ##
-    size: 8Gi
-    ## @param primary.persistence.annotations Annotations for the PVC
-    ##
-    annotations: {}
-    ## @param primary.persistence.labels Labels for the PVC
-    ##
-    labels: {}
-    ## @param primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
-    ## selector:
-    ##   matchLabels:
-    ##     app: my-app
-    ##
-    selector: {}
-    ## @param primary.persistence.dataSource Custom PVC data source
-    ##
-    dataSource: {}
+      ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+      ##
+      enabled: true
+      ## @param primary.persistence.existingClaim Name of an existing PVC to use
+      ##
+      existingClaim: ""
+      ## @param primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      storageClass: ""
+      ## @param primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+      ##
+      accessModes:
+        - ReadWriteOnce
+      ## @param primary.persistence.size PVC Storage Request for PostgreSQL volume
+      ##
+      size: 8Gi
+      ## @param primary.persistence.annotations Annotations for the PVC
+      ##
+      annotations: {}
+      ## @param primary.persistence.labels Labels for the PVC
+      ##
+      labels: {}
+      ## @param primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
+      ## selector:
+      ##   matchLabels:
+      ##     app: my-app
+      ##
+      selector: {}
+      ## @param primary.persistence.dataSource Custom PVC data source
+      ##
+      dataSource: {}
 
 ## @section Redis parameters
 ## Redis chart configuration

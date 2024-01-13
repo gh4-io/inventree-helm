@@ -240,13 +240,13 @@ postgresql:
       scripts: {}
 
     persistence:
-      ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+      ## @param postgresql.primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
       ##
       enabled: true
-      ## @param primary.persistence.existingClaim Name of an existing PVC to use
+      ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
       ##
       existingClaim: ""
-      ## @param primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+      ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
       ## If defined, storageClassName: <storageClass>
       ## If set to "-", storageClassName: "", which disables dynamic provisioning
       ## If undefined (the default) or set to null, no storageClassName spec is
@@ -254,26 +254,26 @@ postgresql:
       ##   GKE, AWS & OpenStack)
       ##
       storageClass: ""
-      ## @param primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+      ## @param postgresql.primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
       ##
       accessModes:
         - ReadWriteOnce
-      ## @param primary.persistence.size PVC Storage Request for PostgreSQL volume
+      ## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
       ##
       size: 8Gi
-      ## @param primary.persistence.annotations Annotations for the PVC
+      ## @param postgresql.primary.persistence.annotations Annotations for the PVC
       ##
       annotations: {}
-      ## @param primary.persistence.labels Labels for the PVC
+      ## @param postgresql.primary.persistence.labels Labels for the PVC
       ##
       labels: {}
-      ## @param primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
+      ## @param postgresql.primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
       ## selector:
       ##   matchLabels:
       ##     app: my-app
       ##
       selector: {}
-      ## @param primary.persistence.dataSource Custom PVC data source
+      ## @param postgresql.primary.persistence.dataSource Custom PVC data source
       ##
       dataSource: {}
 
@@ -319,12 +319,12 @@ redis:
   replica:
     count: 0
 
-  ## @param image.registry [default: REGISTRY_NAME] Redis&reg; image registry
-  ## @param image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
+  ## @param redis.image.registry [default: REGISTRY_NAME] Redis&reg; image registry
+  ## @param redis.image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
   ## @skip image.tag Redis&reg; image tag (immutable tags are recommended)
-  ## @param image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-  ## @param image.pullPolicy Redis&reg; image pull policy
-  ## @param image.pullSecrets Redis&reg; image pull secrets
+  ## @param redis.image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param redis.image.pullPolicy Redis&reg; image pull policy
+  ## @param redis.image.pullSecrets Redis&reg; image pull secrets
   ##
   image:
     registry: docker.io

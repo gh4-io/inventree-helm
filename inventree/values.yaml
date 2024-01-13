@@ -1,0 +1,573 @@
+## Default values for Inventree 
+
+
+## @section Global parameters
+## Global common parameters (see Bitnamis common chart)
+## @param global.imageRegistry Global container image registry
+## @param global.imagePullSecrets Global container image pull secret
+## @param global.storageClass Global storageClass to use for persistent volumes
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+
+## @param kubeVersion Force target Kubernetes version (using Helm capabilities if not set)
+kubeVersion: ""
+## @param nameOverride String to partially override inventree.fullname include (will maintain the release name)
+nameOverride: ""
+## @param fullnameOverride String to fully override inventree.fullname template
+fullnameOverride: ""
+## @param commonLabels Add labels to all the deployed resources
+commonLabels: {}
+## @param commonAnnotations Add annotations to all the deployed resources
+commonAnnotations: {}
+
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+## @param affinity Affinity for pod assignment
+affinity: {}
+
+## @param imageRegistry Container registry to use for all Inventree images
+imageRegistry: ghcr.io
+
+## @section Inventree parameters
+
+## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+## @section Workers parameters
+## Invintree Workers configurations
+##
+workers: 
+  ## @param workers.enabled
+  ##
+  enabled: true
+  ## @param workers.nameOverride String to partially override inventree.fullname include (will maintain the release name)
+  nameOverride: ""
+  ## @param workers.fullnameOverride String to fully override inventree.fullname template
+  fullnameOverride: ""
+  ## @param workers.commonLabels Add labels to all the deployed resources
+  commonLabels: {}
+  ## @param workers.commonAnnotations Add annotations to all the deployed resources
+  commonAnnotations: {}
+
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ## @param workers.tolerations Tolerations for pod assignment
+  tolerations: []
+
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## @param workers.affinity Affinity for pod assignment
+  affinity: {}
+
+  ## @param workers.imageRegistry Container registry to use for all Inventree images
+  imageRegistry: ghcr.io
+
+  ## @param workers.image.registry [default: REGISTRY_NAME] inventree worker image registry
+  ## @param workers.image.repository [default: REPOSITORY_NAME/inventree worker] inventree worker image repository
+  ## @skip image.tag inventree worker image tag (immutable tags are recommended)
+  ## @param workers.image.digest inventree worker image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param workers.image.pullPolicy inventree worker image pull policy
+  ## @param workers.image.pullSecrets Specify docker-registry secret names as an array
+  ## @param workers.image.debug Set to true if you would like to see extra information on logs
+  ##
+  image:
+    registry: ""
+    repository: inventree/inventree
+    tag: ""
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## E.g.:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Command and args for running the container (set to default if not set). Use array form
+  ## @param workers.command Override default container command (useful when using custom images)
+  ## @param workers.args Override default container args (useful when using custom images)
+  ##
+  command: []
+  args: []
+  ## @param workers.extraEnvVars Extra environment variables to be set on Inventree containers
+  ## E.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: BAR
+  ##
+  extraEnvVars: []
+  ## @param workers.extraEnvVarsCM ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM: ""
+  ## @param workers.extraEnvVarsSecret Secret with extra environment variables
+  ##
+  extraEnvVarsSecret: ""
+
+  ## @section Inventree deployment parameters
+
+  ## @param workers.replicaCount Number of Inventree replicas to deploy
+  ##
+  replicaCount: 1
+
+## %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+## @section Storage parameters
+
+## If deploying postgresql from this chart (see `postgresql.enabled`),
+## the username, password and database name for the `inventree` database needs to be configured in the respective sections.
+## If using an external database, the `inventree` database needs to be created manually and the credentials need to be configured here.
+## If using the built-in PostgreSQL, the `inventree` database will be created automatically.
+externalDatabase:
+  ## @param externalDatabase.enabled Set to true to use an external database
+  enabled: false
+
+  ## @param externalDatabase.type Type of the external database for inventree (`mysql`/`postgresql`)
+  ## Use `mysql` for MariaDB
+  type: ""
+
+  ## @param externalDatabase.host Hostname of the database
+  host: ""
+
+  ## @param externalDatabase.port Port of the database
+  port: 3306
+
+  ## @param externalDatabase.database Name of the database
+  database: inventree
+
+  ## @param externalDatabase.username Username to use for the database
+  username: inventree
+
+  ## @param externalDatabase.password Password to use for the database
+  password: ""
+
+  ## @param externalDatabase.existingSecret Name of the secret containing the database credentials
+  existingSecret: ""
+
+  ## @param externalDatabase.existingSecretDatabaseKey Key in the secret containing the database name
+  existingSecretDatabaseKey: "database"
+
+  ## @param externalDatabase.existingSecretUsernameKey Key in the secret containing the database username
+  existingSecretUsernameKey: "username"
+
+  ## @param externalDatabase.existingSecretPasswordKey Key in the secret containing the database password
+  existingSecretPasswordKey: "password"
+
+externalRedis:
+  ## @param externalRedis.enabled Set to true to use an external Redis instance (ignored if `redis.enabled` is true)
+  enabled: false
+
+  ## @param externalRedis.host Hostname of the external Redis instance
+  host: ""
+
+  ## @param externalRedis.port Port of the external Redis instance
+  port: 6379
+
+  ## @param externalRedis.adminQuotaDbId Redis database ID for the quota storage on the admin pod
+  adminQuotaDbId: 1
+
+  ## @param externalRedis.adminRateLimitDbId Redis database ID for the rate limit storage on the admin pod
+  adminRateLimitDbId: 2
+
+  ## @param externalRedis.rspamdDbId Redis database ID for the rspamd storage on the rspamd pod
+  ## Changing this value does nothing as the option is not configurable in rspamd pod yet
+  ## ref: https://rspamd.com/doc/configuration/redis.html#available-redis-options
+  rspamdDbId: 0
+
+## @section  PostgreSQL parameters
+## PostgreSQL chart configuration
+##
+postgresql:
+  ## @param postgresql.enabled Enable PostgreSQL deployment
+  enabled: false
+
+  ## @param postgresql.architecture PostgreSQL architecture. Allowed values: standalone or replication
+  architecture: standalone
+
+  ## @param postgresql.auth.enablePostgresUser Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user
+  ## @param postgresql.auth.postgresPassword Password for the "postgres" admin user. Ignored if `auth.existingSecret` with key `postgres-password` is provided
+  ## @param postgresql.auth.username Name for a custom user to create
+  ## @param postgresql.auth.password Password for the custom user to create. Ignored if `auth.existingSecret` with key `password` is provided
+  ## @param postgresql.auth.database Name for a custom database to create
+  ## @param postgresql.auth.existingSecret Use existing secret for password details (`auth.postgresPassword`, `auth.password` will be ignored and picked up from this secret). The secret has to contain the keys `postgres-password` and `password`
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+    username: inventree
+    password: ""
+    database: inventree
+    existingSecret: ""
+
+    ## @param postgresql.auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    ## @param postgresql.auth.secretKeys.userPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    ## @param postgresql.auth.secretKeys.replicationPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+      replicationPasswordKey: replication-password
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  ## @param postgresql.primary.persistence.enabled Enable persistence using PVC
+  ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL volume
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ## @param postgresql.primary.persistence.accessMode PVC Access Mode for PostgreSQL volume
+  ## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
+  primary:
+    ## @skip postgresql.primary.extraEnvVars
+    ## Array with extra environment variables, used to create the initial `roundcube` database; DO NOT EDIT; see `global.database` instead
+    extraEnvVars: []
+
+    initdb:
+      ## @skip postgresql.primary.initdb.scripts.create_roundcube_database.sh
+      ## DO NOT EDIT Script to create the roundcube database
+      scripts: {}
+
+    persistence:
+    ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+    ##
+    enabled: true
+    ## @param primary.persistence.existingClaim Name of an existing PVC to use
+    ##
+    existingClaim: ""
+    ## @param primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    storageClass: ""
+    ## @param primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param primary.persistence.size PVC Storage Request for PostgreSQL volume
+    ##
+    size: 8Gi
+    ## @param primary.persistence.annotations Annotations for the PVC
+    ##
+    annotations: {}
+    ## @param primary.persistence.labels Labels for the PVC
+    ##
+    labels: {}
+    ## @param primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+    selector: {}
+    ## @param primary.persistence.dataSource Custom PVC data source
+    ##
+    dataSource: {}
+
+## @section Redis parameters
+## Redis chart configuration
+## for more options see https://github.com/bitnami/charts/tree/master/bitnami/redis
+redis:
+  ## @param redis.enabled Enable redis deployment through the redis subchart
+  enabled: true
+
+  ## @param redis.architecture Redis architecture. Allowed values: `standalone` or `replication`
+  architecture: standalone
+
+  ## @param redis.auth.enabled DON'T CHANGE THIS VALUE. Mailu doesn't support Redis authentication
+  auth:
+    enabled: false
+
+  master:
+    ## @param redis.master.enabled DON'T CHANGE THIS VALUE. Enable redis master
+    enabled: true
+
+    ## @param redis.master.count Number of redis master replicas
+    count: 1
+
+    ## @param redis.master.persistence.enabled Enable persistence using Persistent Volume Claims
+    ## @param redis.master.persistence.size Pod pvc size
+    ## @param redis.master.persistence.storageClass Pod pvc storage class
+    ## @param redis.master.persistence.accessModes Pod pvc access modes
+    ## @param redis.master.persistence.annotations Pod pvc annotations
+    ## @param redis.master.persistence.existingClaim Pod pvc existing claim; necessary if using single_pvc
+    ## @param redis.master.persistence.subPath Subpath in PVC; necessary if using single_pvc (set it to `/redis`)
+    persistence:
+      enabled: true
+      size: 8Gi
+      storageClass: ""
+      accessModes: [ReadWriteOnce]
+      existingClaim: ""
+      subPath: ""
+      annotations: {}
+
+  ## @param redis.replica.count Number of redis replicas (only if `redis.architecture=replication`)
+  ## Don't forget to configure replicas persistence if changing this value
+  replica:
+    count: 0
+
+  ## @param image.registry [default: REGISTRY_NAME] Redis&reg; image registry
+  ## @param image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
+  ## @skip image.tag Redis&reg; image tag (immutable tags are recommended)
+  ## @param image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param image.pullPolicy Redis&reg; image pull policy
+  ## @param image.pullSecrets Redis&reg; image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: "7.2.4"
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+## @section Proxy parameters
+## Nginx Proxy configuration
+##
+proxy:
+  ## @param proxy.enabled Enable nginx proxy through nginx subchart. 
+  ##
+  enabled: false
+  ## @param proxy.nameOverride String to partially override nginx.fullname template (will maintain the release name)
+  ##
+  nameOverride: ""
+  ## @param proxy.fullnameOverride String to fully override nginx.fullname template
+  ##
+  fullnameOverride: ""
+  ## @param proxy.namespaceOverride String to fully override common.names.namespace
+  ##
+  namespaceOverride: ""
+  ## @param proxy.kubeVersion Force target Kubernetes version (using Helm capabilities if not set)
+  ##
+  kubeVersion: ""
+  ## @param proxy.clusterDomain Kubernetes Cluster Domain
+  ##
+  clusterDomain: cluster.local
+  ## @param proxy.extraDeploy Extra objects to deploy (value evaluated as a template)
+  ##
+  extraDeploy: []
+  ## @param proxy.commonLabels Add labels to all the deployed resources
+  ##
+  commonLabels: {}
+  ## @param proxy.commonAnnotations Add annotations to all the deployed resources
+  ##
+  commonAnnotations: {}
+  ## @param proxy.replicaCount Number of NGINX replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param proxy.image.registry [default: REGISTRY_NAME] NGINX image registry
+  ## @param proxy.image.repository [default: REPOSITORY_NAME/nginx] NGINX image repository
+  ## @skip image.tag NGINX image tag (immutable tags are recommended)
+  ## @param proxy.image.digest NGINX image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param proxy.image.pullPolicy NGINX image pull policy
+  ## @param proxy.image.pullSecrets Specify docker-registry secret names as an array
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/nginx
+    tag: 1.25.3-debian-11-r4
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## E.g.:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param proxy.extraEnvVars Extra environment variables to be set on NGINX containers
+  ## E.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: BAR
+  ##
+  extraEnvVars: []
+  ## @param proxy.extraEnvVarsCM ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM: ""
+  ## @param proxy.extraEnvVarsSecret Secret with extra environment variables
+  ##
+  extraEnvVarsSecret: ""
+  ## @param proxy.podLabels Additional labels for NGINX pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param proxy.podAnnotations Annotations for NGINX pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param proxy.podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param proxy.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param proxy.nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param proxy.nodeAffinityPreset.key Node label key to match Ignored if `affinity` is set.
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## @param proxy.nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param proxy.affinity Affinity for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param proxy.extraVolumes Array to add extra volumes
+  ##
+  extraVolumes: []
+  ## @param proxy.extraVolumeMounts Array to add extra mount
+  ##
+  extraVolumeMounts: []
+  ## @param proxy.serverBlock Custom server block to be added to NGINX configuration
+  ## PHP-FPM example server block:
+  ## serverBlock: |-
+  ##   server {
+  ##     listen 0.0.0.0:8080;
+  ##     root /app;
+  ##     location / {
+  ##       index index.html index.php;
+  ##     }
+  ##     location ~ \.php$ {
+  ##       fastcgi_pass phpfpm-server:9000;
+  ##       fastcgi_index index.php;
+  ##       include fastcgi.conf;
+  ##     }
+  ##   }
+  ##
+  serverBlock: ""
+  ## @param proxy.existingServerBlockConfigmap ConfigMap with custom server block to be added to NGINX configuration
+  ## NOTE: This will override serverBlock
+  ##
+  existingServerBlockConfigmap: inventree-proxy-prod-conf
+  ## @param proxy.staticSiteConfigmap Name of existing ConfigMap with the server static site content
+  ##
+  staticSiteConfigmap: ""
+  ## @param proxy.staticSitePVC Name of existing PVC with the server static site content
+  ## NOTE: This will override staticSiteConfigmap
+  ##
+  staticSitePVC: ""
+
+  ## @section Traffic Exposure parameters
+
+  ## NGINX Service properties
+  ##
+  service:
+    ## @param proxy.service.type Service type
+    ##
+    type: LoadBalancer
+    ## @param proxy.service.ports.http Service HTTP port
+    ## @param proxy.service.ports.https Service HTTPS port
+    ##
+    ports:
+      http: 80
+      https: 443
+    ##
+    ## @param proxy.service.nodePorts [object] Specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    ##
+    nodePorts:
+      http: ""
+      https: ""
+    ## @param proxy.service.targetPort [object] Target port reference value for the Loadbalancer service types can be specified explicitly.
+    ## Listeners for the Loadbalancer can be custom mapped to the http or https service.
+    ## Example: Mapping the https listener to targetPort http [http: https]
+    ##
+    targetPort:
+      http: http
+      https: https
+    ## @param proxy.service.clusterIP NGINX service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP: ""
+    ## @param proxy.service.loadBalancerIP LoadBalancer service IP address
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+    ##
+    loadBalancerIP: ""
+    ## @param proxy.service.loadBalancerSourceRanges NGINX service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param proxy.service.loadBalancerClass service Load Balancer class if service type is `LoadBalancer` (optional, cloud specific)
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerClass: ""
+    ## @param proxy.service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
+    ##
+    extraPorts: []
+    ## @param proxy.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+    ## If "ClientIP", consecutive client requests will be directed to the same Pod
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+    ##
+    sessionAffinity: None
+    ## @param proxy.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+    ## @param proxy.service.annotations Service annotations
+    ## This can be used to set the LoadBalancer service type to internal only.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+    ##
+    annotations: {}
+    ## @param proxy.service.externalTrafficPolicy Enable client source IP preservation
+    ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+
+
+
+
+
+
+
+
+
+

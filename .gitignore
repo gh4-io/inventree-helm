@@ -2,3 +2,8 @@
 *.idea/*
 .vscode
 .DS_Store
+.project/
+.custom*
+.vscode/
+inventree/Charts/*
+.gitignore

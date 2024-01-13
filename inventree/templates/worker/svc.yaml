@@ -1,0 +1,67 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "inventree.names.workers.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.workers.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    {{- if or .Values.workers.service.annotations .Values.workers.commonAnnotations }}
+    {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.workers.service.annotations .Values.commonAnnotations ) "context" . ) }}
+    {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if and .Values.metrics.enabled .Values.metrics.service.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.metrics.service.annotations "context" $) | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.workers.service.type }}
+  {{- if and .Values.workers.service.clusterIP (eq .Values.workers.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.workers.service.clusterIP }}
+  {{- end }}
+  {{- if .Values.workers.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.workers.service.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.workers.service.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.workers.service.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if or (eq .Values.workers.service.type "LoadBalancer") (eq .Values.workers.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.workers.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.workers.service.type "LoadBalancer") (not (empty .Values.workers.service.loadBalancerSourceRanges)) }}
+  loadBalancerSourceRanges: {{- toYaml .Values.workers.service.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- if and (eq .Values.workers.service.type "LoadBalancer") (not (empty .Values.workers.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.workers.service.loadBalancerIP }}
+  {{- end }}
+  {{- if and (eq .Values.workers.service.type "LoadBalancer") .Values.workers.service.loadBalancerClass }}
+  loadBalancerClass: {{ .Values.workers.service.loadBalancerClass }}
+  {{- end }}
+  ports:
+    - name: http
+      port: {{ .Values.workers.service.ports.http }}
+      targetPort: {{ .Values.workers.service.targetPort.http }}
+      {{- if and (or (eq .Values.workers.service.type "NodePort") (eq .Values.workers.service.type "LoadBalancer")) (not (empty .Values.workers.service.nodePorts.http)) }}
+      nodePort: {{ .Values.workers.service.nodePorts.http }}
+      {{- end }}
+    {{- if .Values.workers.containerPorts.https }}
+    - name: https
+      port: {{ .Values.workers.service.ports.https }}
+      targetPort: {{ .Values.workers.service.targetPort.https }}
+      {{- if and (or (eq .Values.workers.service.type "NodePort") (eq .Values.workers.service.type "LoadBalancer")) (not (empty .Values.workers.service.nodePorts.https)) }}
+      nodePort: {{ .Values.workers.service.nodePorts.https }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.workers.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.workers.metrics.service.port }}
+      targetPort: metrics
+    {{- end }}
+    {{- if .Values.workers.service.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.workers.service.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.workers.podLabels .Values.workers.commonLabels ) "context" . ) }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 4 }}

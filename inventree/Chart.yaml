@@ -3,7 +3,7 @@ name: inventree
 description: "Open-source Inventory Management System"
 type: application
 version: 0.0.2
-appVersion: 0.10.0
+appVersion: 0.13.1
 keywords:
   - inventree
   - asset
@@ -15,13 +15,27 @@ sources:
   - https://gitlab.com/playground254/inventree-home
 maintainers:
   - name: jason
-    email: chrispnugget88@yahoo.com
+    email: helmcharts@gh4.io
 dependencies: 
   - name: common
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
     version: 2.x.x
+  - name: postgresql
+    condition: postgresql.enabled
+    repository: https://charts.bitnami.com/bitnami
+    version: 13.x.x
+  - name: redis
+    condition: redis.enabled
+    repository: https://charts.bitnami.com/bitnami
+    version: 18.x.x
+  - name: nginx 
+    condition: proxy.enabled
+    repository: https://charts.bitnami.com/bitnami
+    version: 15.x.x
+    alias: proxy
+
 home: https://gitlab.com/playground254/inventree-home
 icon: https://gitlab.com/playground254/inventree-home/media/icon.png
 kubeVersion: ">=1.16.0-0"

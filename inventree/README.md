@@ -27,119 +27,119 @@
 | `tolerations`            | Tolerations for pod assignment                                                           | `[]`           |
 | `affinity`               | Affinity for pod assignment                                                              | `{}`           |
 
-### Inventree parameters
+### Inventree Server parameters
 
-| Name                                                          | Description                                                                                                              | Value                        |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| `inventree.image.registry`                                    | Inventree image registry                                                                                                 | `REGISTRY_NAME`              |
-| `inventree.image.repository`                                  | Inventree image repository                                                                                               | `REPOSITORY_NAME/jupyterhub` |
-| `inventree.image.digest`                                      | Inventree image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                | `""`                         |
-| `inventree.image.pullPolicy`                                  | Inventree image pull policy                                                                                              | `IfNotPresent`               |
-| `inventree.image.pullSecrets`                                 | Inventree image pull secrets                                                                                             | `[]`                         |
-| `inventree.baseUrl`                                           | Inventree base URL                                                                                                       | `/`                          |
-| `inventree.adminUser`                                         | Inventree Dummy authenticator admin user                                                                                 | `user`                       |
-| `inventree.password`                                          | Inventree Dummy authenticator password                                                                                   | `""`                         |
-| `inventree.services`                                          | JupyterHub services interacting with the JupyterHub API                                                                  | `{}`                         |
-| `inventree.configuration`                                     | Inventree configuration file (to be used by jupyterhub_config.py)                                                        | `""`                         |
-| `inventree.existingConfigmap`                                 | Configmap with Inventree init scripts (replaces the scripts in templates/inventree/configmap.yml)                        | `""`                         |
-| `inventree.existingSecret`                                    | Secret with inventree configuration (replaces the inventree.configuration value) and proxy token                         | `""`                         |
-| `inventree.command`                                           | Override Inventree default command                                                                                       | `[]`                         |
-| `inventree.args`                                              | Override Inventree default args                                                                                          | `[]`                         |
-| `inventree.extraEnvVars`                                      | Add extra environment variables to the Inventree container                                                               | `[]`                         |
-| `inventree.extraEnvVarsCM`                                    | Name of existing ConfigMap containing extra env vars                                                                     | `""`                         |
-| `inventree.extraEnvVarsSecret`                                | Name of existing Secret containing extra env vars                                                                        | `""`                         |
-| `inventree.containerPorts.http`                               | Inventree container port                                                                                                 | `1337`                       |
-| `inventree.startupProbe.enabled`                              | Enable startupProbe on Inventree containers                                                                              | `true`                       |
-| `inventree.startupProbe.initialDelaySeconds`                  | Initial delay seconds for startupProbe                                                                                   | `10`                         |
-| `inventree.startupProbe.periodSeconds`                        | Period seconds for startupProbe                                                                                          | `10`                         |
-| `inventree.startupProbe.timeoutSeconds`                       | Timeout seconds for startupProbe                                                                                         | `3`                          |
-| `inventree.startupProbe.failureThreshold`                     | Failure threshold for startupProbe                                                                                       | `30`                         |
-| `inventree.startupProbe.successThreshold`                     | Success threshold for startupProbe                                                                                       | `1`                          |
-| `inventree.livenessProbe.enabled`                             | Enable livenessProbe on Inventree containers                                                                             | `true`                       |
-| `inventree.livenessProbe.initialDelaySeconds`                 | Initial delay seconds for livenessProbe                                                                                  | `10`                         |
-| `inventree.livenessProbe.periodSeconds`                       | Period seconds for livenessProbe                                                                                         | `10`                         |
-| `inventree.livenessProbe.timeoutSeconds`                      | Timeout seconds for livenessProbe                                                                                        | `3`                          |
-| `inventree.livenessProbe.failureThreshold`                    | Failure threshold for livenessProbe                                                                                      | `30`                         |
-| `inventree.livenessProbe.successThreshold`                    | Success threshold for livenessProbe                                                                                      | `1`                          |
-| `inventree.readinessProbe.enabled`                            | Enable readinessProbe on Inventree containers                                                                            | `true`                       |
-| `inventree.readinessProbe.initialDelaySeconds`                | Initial delay seconds for readinessProbe                                                                                 | `10`                         |
-| `inventree.readinessProbe.periodSeconds`                      | Period seconds for readinessProbe                                                                                        | `10`                         |
-| `inventree.readinessProbe.timeoutSeconds`                     | Timeout seconds for readinessProbe                                                                                       | `3`                          |
-| `inventree.readinessProbe.failureThreshold`                   | Failure threshold for readinessProbe                                                                                     | `30`                         |
-| `inventree.readinessProbe.successThreshold`                   | Success threshold for readinessProbe                                                                                     | `1`                          |
-| `inventree.customStartupProbe`                                | Override default startup probe                                                                                           | `{}`                         |
-| `inventree.customLivenessProbe`                               | Override default liveness probe                                                                                          | `{}`                         |
-| `inventree.customReadinessProbe`                              | Override default readiness probe                                                                                         | `{}`                         |
-| `inventree.resources.limits`                                  | The resources limits for the Inventree containers                                                                        | `{}`                         |
-| `inventree.resources.requests`                                | The requested resources for the Inventree containers                                                                     | `{}`                         |
-| `inventree.containerSecurityContext.enabled`                  | Enabled containers' Security Context                                                                                     | `true`                       |
-| `inventree.containerSecurityContext.runAsUser`                | Set containers' Security Context runAsUser                                                                               | `1001`                       |
-| `inventree.containerSecurityContext.runAsNonRoot`             | Set container's Security Context runAsNonRoot                                                                            | `true`                       |
-| `inventree.containerSecurityContext.privileged`               | Set container's Security Context privileged                                                                              | `false`                      |
-| `inventree.containerSecurityContext.readOnlyRootFilesystem`   | Set container's Security Context readOnlyRootFilesystem                                                                  | `false`                      |
-| `inventree.containerSecurityContext.allowPrivilegeEscalation` | Set container's Security Context allowPrivilegeEscalation                                                                | `false`                      |
-| `inventree.containerSecurityContext.capabilities.drop`        | List of capabilities to be dropped                                                                                       | `["ALL"]`                    |
-| `inventree.containerSecurityContext.seccompProfile.type`      | Set container's Security Context seccomp profile                                                                         | `RuntimeDefault`             |
-| `inventree.podSecurityContext.enabled`                        | Enabled Inventree pods' Security Context                                                                                 | `true`                       |
-| `inventree.podSecurityContext.fsGroup`                        | Set Inventree pod's Security Context fsGroup                                                                             | `1001`                       |
-| `inventree.lifecycleHooks`                                    | LifecycleHooks for the Inventree container to automate configuration before or after startup                             | `{}`                         |
-| `inventree.hostAliases`                                       | Add deployment host aliases                                                                                              | `[]`                         |
-| `inventree.podLabels`                                         | Add extra labels to the Inventree pods                                                                                   | `{}`                         |
-| `inventree.podAnnotations`                                    | Add extra annotations to the Inventree pods                                                                              | `{}`                         |
-| `inventree.podAffinityPreset`                                 | Pod affinity preset. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`                            | `""`                         |
-| `inventree.podAntiAffinityPreset`                             | Pod anti-affinity preset. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`                       | `soft`                       |
-| `inventree.nodeAffinityPreset.type`                           | Node affinity preset type. Ignored if `inventree.affinity` is set. Allowed values: `soft` or `hard`                      | `""`                         |
-| `inventree.nodeAffinityPreset.key`                            | Node label key to match. Ignored if `inventree.affinity` is set                                                          | `""`                         |
-| `inventree.nodeAffinityPreset.values`                         | Node label values to match. Ignored if `inventree.affinity` is set                                                       | `[]`                         |
-| `inventree.affinity`                                          | Affinity for pod assignment.                                                                                             | `{}`                         |
-| `inventree.nodeSelector`                                      | Node labels for pod assignment.                                                                                          | `{}`                         |
-| `inventree.tolerations`                                       | Tolerations for pod assignment.                                                                                          | `[]`                         |
-| `inventree.topologySpreadConstraints`                         | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template | `[]`                         |
-| `inventree.priorityClassName`                                 | Priority Class Name                                                                                                      | `""`                         |
-| `inventree.schedulerName`                                     | Use an alternate scheduler, e.g. "stork".                                                                                | `""`                         |
-| `inventree.terminationGracePeriodSeconds`                     | Seconds Inventree pod needs to terminate gracefully                                                                      | `""`                         |
-| `inventree.updateStrategy.type`                               | Update strategy - only really applicable for deployments with RWO PVs attached                                           | `RollingUpdate`              |
-| `inventree.updateStrategy.rollingUpdate`                      | Inventree deployment rolling update configuration parameters                                                             | `{}`                         |
-| `inventree.extraVolumes`                                      | Optionally specify extra list of additional volumes for Inventree pods                                                   | `[]`                         |
-| `inventree.extraVolumeMounts`                                 | Optionally specify extra list of additional volumeMounts for Inventree container(s)                                      | `[]`                         |
-| `inventree.initContainers`                                    | Add additional init containers to the Inventree pods                                                                     | `[]`                         |
-| `inventree.sidecars`                                          | Add additional sidecar containers to the Inventree pod                                                                   | `[]`                         |
-| `inventree.pdb.create`                                        | Deploy Inventree PodDisruptionBudget                                                                                     | `false`                      |
-| `inventree.pdb.minAvailable`                                  | Set minimum available inventree instances                                                                                | `""`                         |
-| `inventree.pdb.maxUnavailable`                                | Set maximum available inventree instances                                                                                | `""`                         |
+| Name                                                       | Description                                                                                                              | Value                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| `master.image.registry`                                    | Inventree image registry                                                                                                 | `REGISTRY_NAME`              |
+| `master.image.repository`                                  | Inventree image repository                                                                                               | `REPOSITORY_NAME/jupyterhub` |
+| `master.image.digest`                                      | Inventree image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag                | `""`                         |
+| `master.image.pullPolicy`                                  | Inventree image pull policy                                                                                              | `IfNotPresent`               |
+| `master.image.pullSecrets`                                 | Inventree image pull secrets                                                                                             | `[]`                         |
+| `master.baseUrl`                                           | Inventree base URL                                                                                                       | `/`                          |
+| `master.adminUser`                                         | Inventree Dummy authenticator admin user                                                                                 | `admin`                      |
+| `master.password`                                          | Inventree Dummy authenticator password                                                                                   | `""`                         |
+| `master.services`                                          | JupyterHub services interacting with the JupyterHub API                                                                  | `{}`                         |
+| `master.configuration`                                     | Inventree configuration file (to be used by jupyterhub_config.py)                                                        | `""`                         |
+| `master.existingConfigmap`                                 | Configmap with Inventree init scripts (replaces the scripts in templates/inventree/configmap.yml)                        | `""`                         |
+| `master.existingSecret`                                    | Secret with inventree configuration (replaces the master.configuration value) and proxy token                            | `""`                         |
+| `master.command`                                           | Override Inventree default command                                                                                       | `[]`                         |
+| `master.args`                                              | Override Inventree default args                                                                                          | `[]`                         |
+| `master.extraEnvVars`                                      | Add extra environment variables to the Inventree container                                                               | `[]`                         |
+| `master.extraEnvVarsCM`                                    | Name of existing ConfigMap containing extra env vars                                                                     | `""`                         |
+| `master.extraEnvVarsSecret`                                | Name of existing Secret containing extra env vars                                                                        | `""`                         |
+| `master.containerPorts.http`                               | Inventree container port                                                                                                 | `1337`                       |
+| `master.startupProbe.enabled`                              | Enable startupProbe on Inventree containers                                                                              | `true`                       |
+| `master.startupProbe.initialDelaySeconds`                  | Initial delay seconds for startupProbe                                                                                   | `10`                         |
+| `master.startupProbe.periodSeconds`                        | Period seconds for startupProbe                                                                                          | `10`                         |
+| `master.startupProbe.timeoutSeconds`                       | Timeout seconds for startupProbe                                                                                         | `3`                          |
+| `master.startupProbe.failureThreshold`                     | Failure threshold for startupProbe                                                                                       | `30`                         |
+| `master.startupProbe.successThreshold`                     | Success threshold for startupProbe                                                                                       | `1`                          |
+| `master.livenessProbe.enabled`                             | Enable livenessProbe on Inventree containers                                                                             | `true`                       |
+| `master.livenessProbe.initialDelaySeconds`                 | Initial delay seconds for livenessProbe                                                                                  | `10`                         |
+| `master.livenessProbe.periodSeconds`                       | Period seconds for livenessProbe                                                                                         | `10`                         |
+| `master.livenessProbe.timeoutSeconds`                      | Timeout seconds for livenessProbe                                                                                        | `3`                          |
+| `master.livenessProbe.failureThreshold`                    | Failure threshold for livenessProbe                                                                                      | `30`                         |
+| `master.livenessProbe.successThreshold`                    | Success threshold for livenessProbe                                                                                      | `1`                          |
+| `master.readinessProbe.enabled`                            | Enable readinessProbe on Inventree containers                                                                            | `true`                       |
+| `master.readinessProbe.initialDelaySeconds`                | Initial delay seconds for readinessProbe                                                                                 | `10`                         |
+| `master.readinessProbe.periodSeconds`                      | Period seconds for readinessProbe                                                                                        | `10`                         |
+| `master.readinessProbe.timeoutSeconds`                     | Timeout seconds for readinessProbe                                                                                       | `3`                          |
+| `master.readinessProbe.failureThreshold`                   | Failure threshold for readinessProbe                                                                                     | `30`                         |
+| `master.readinessProbe.successThreshold`                   | Success threshold for readinessProbe                                                                                     | `1`                          |
+| `master.customStartupProbe`                                | Override default startup probe                                                                                           | `{}`                         |
+| `master.customLivenessProbe`                               | Override default liveness probe                                                                                          | `{}`                         |
+| `master.customReadinessProbe`                              | Override default readiness probe                                                                                         | `{}`                         |
+| `master.resources.limits`                                  | The resources limits for the Inventree containers                                                                        | `{}`                         |
+| `master.resources.requests`                                | The requested resources for the Inventree containers                                                                     | `{}`                         |
+| `master.containerSecurityContext.enabled`                  | Enabled containers' Security Context                                                                                     | `true`                       |
+| `master.containerSecurityContext.runAsUser`                | Set containers' Security Context runAsUser                                                                               | `1001`                       |
+| `master.containerSecurityContext.runAsNonRoot`             | Set container's Security Context runAsNonRoot                                                                            | `true`                       |
+| `master.containerSecurityContext.privileged`               | Set container's Security Context privileged                                                                              | `false`                      |
+| `master.containerSecurityContext.readOnlyRootFilesystem`   | Set container's Security Context readOnlyRootFilesystem                                                                  | `false`                      |
+| `master.containerSecurityContext.allowPrivilegeEscalation` | Set container's Security Context allowPrivilegeEscalation                                                                | `false`                      |
+| `master.containerSecurityContext.capabilities.drop`        | List of capabilities to be dropped                                                                                       | `["ALL"]`                    |
+| `master.containerSecurityContext.seccompProfile.type`      | Set container's Security Context seccomp profile                                                                         | `RuntimeDefault`             |
+| `master.podSecurityContext.enabled`                        | Enabled Inventree pods' Security Context                                                                                 | `true`                       |
+| `master.podSecurityContext.fsGroup`                        | Set Inventree pod's Security Context fsGroup                                                                             | `1001`                       |
+| `master.lifecycleHooks`                                    | LifecycleHooks for the Inventree container to automate configuration before or after startup                             | `{}`                         |
+| `master.hostAliases`                                       | Add deployment host aliases                                                                                              | `[]`                         |
+| `master.podLabels`                                         | Add extra labels to the Inventree pods                                                                                   | `{}`                         |
+| `master.podAnnotations`                                    | Add extra annotations to the Inventree pods                                                                              | `{}`                         |
+| `master.podAffinityPreset`                                 | Pod affinity preset. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`                               | `""`                         |
+| `master.podAntiAffinityPreset`                             | Pod anti-affinity preset. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`                          | `soft`                       |
+| `master.nodeAffinityPreset.type`                           | Node affinity preset type. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`                         | `""`                         |
+| `master.nodeAffinityPreset.key`                            | Node label key to match. Ignored if `master.affinity` is set                                                             | `""`                         |
+| `master.nodeAffinityPreset.values`                         | Node label values to match. Ignored if `master.affinity` is set                                                          | `[]`                         |
+| `master.affinity`                                          | Affinity for pod assignment.                                                                                             | `{}`                         |
+| `master.nodeSelector`                                      | Node labels for pod assignment.                                                                                          | `{}`                         |
+| `master.tolerations`                                       | Tolerations for pod assignment.                                                                                          | `[]`                         |
+| `master.topologySpreadConstraints`                         | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template | `[]`                         |
+| `master.priorityClassName`                                 | Priority Class Name                                                                                                      | `""`                         |
+| `master.schedulerName`                                     | Use an alternate scheduler, e.g. "stork".                                                                                | `""`                         |
+| `master.terminationGracePeriodSeconds`                     | Seconds Inventree pod needs to terminate gracefully                                                                      | `""`                         |
+| `master.updateStrategy.type`                               | Update strategy - only really applicable for deployments with RWO PVs attached                                           | `RollingUpdate`              |
+| `master.updateStrategy.rollingUpdate`                      | Inventree deployment rolling update configuration parameters                                                             | `{}`                         |
+| `master.extraVolumes`                                      | Optionally specify extra list of additional volumes for Inventree pods                                                   | `[]`                         |
+| `master.extraVolumeMounts`                                 | Optionally specify extra list of additional volumeMounts for Inventree container(s)                                      | `[]`                         |
+| `master.initContainers`                                    | Add additional init containers to the Inventree pods                                                                     | `[]`                         |
+| `master.sidecars`                                          | Add additional sidecar containers to the Inventree pod                                                                   | `[]`                         |
+| `master.pdb.create`                                        | Deploy Inventree PodDisruptionBudget                                                                                     | `false`                      |
+| `master.pdb.minAvailable`                                  | Set minimum available inventree instances                                                                                | `""`                         |
+| `master.pdb.maxUnavailable`                                | Set maximum available inventree instances                                                                                | `""`                         |
 
 ### Inventree RBAC parameters
 
-| Name                                                    | Description                                                            | Value  |
-| ------------------------------------------------------- | ---------------------------------------------------------------------- | ------ |
-| `inventree.serviceAccount.create`                       | Specifies whether a ServiceAccount should be created                   | `true` |
-| `inventree.serviceAccount.name`                         | Override Inventree service account name                                | `""`   |
-| `inventree.serviceAccount.automountServiceAccountToken` | Allows auto mount of ServiceAccountToken on the serviceAccount created | `true` |
-| `inventree.serviceAccount.annotations`                  | Additional custom annotations for the ServiceAccount                   | `{}`   |
-| `inventree.rbac.create`                                 | Specifies whether RBAC resources should be created                     | `true` |
-| `inventree.rbac.rules`                                  | Custom RBAC rules to set                                               | `[]`   |
+| Name                                                 | Description                                                            | Value  |
+| ---------------------------------------------------- | ---------------------------------------------------------------------- | ------ |
+| `master.serviceAccount.create`                       | Specifies whether a ServiceAccount should be created                   | `true` |
+| `master.serviceAccount.name`                         | Override Inventree service account name                                | `""`   |
+| `master.serviceAccount.automountServiceAccountToken` | Allows auto mount of ServiceAccountToken on the serviceAccount created | `true` |
+| `master.serviceAccount.annotations`                  | Additional custom annotations for the ServiceAccount                   | `{}`   |
+| `master.rbac.create`                                 | Specifies whether RBAC resources should be created                     | `true` |
+| `master.rbac.rules`                                  | Custom RBAC rules to set                                               | `[]`   |
 
 ### Inventree Traffic Exposure Parameters
 
-| Name                                            | Description                                                      | Value       |
-| ----------------------------------------------- | ---------------------------------------------------------------- | ----------- |
-| `inventree.networkPolicy.enabled`               | Deploy Inventree network policies                                | `true`      |
-| `inventree.networkPolicy.allowInterspaceAccess` | Allow communication between pods in different namespaces         | `true`      |
-| `inventree.networkPolicy.extraIngress`          | Add extra ingress rules to the NetworkPolicy                     | `""`        |
-| `inventree.networkPolicy.extraEgress`           | Add extra ingress rules to the NetworkPolicy                     | `""`        |
-| `inventree.service.type`                        | Inventree service type                                           | `ClusterIP` |
-| `inventree.service.ports.http`                  | Inventree service HTTP port                                      | `1337`      |
-| `inventree.service.nodePorts.http`              | NodePort for the HTTP endpoint                                   | `""`        |
-| `inventree.service.sessionAffinity`             | Control where client requests go, to the same pod or round-robin | `None`      |
-| `inventree.service.sessionAffinityConfig`       | Additional settings for the sessionAffinity                      | `{}`        |
-| `inventree.service.clusterIP`                   | Inventree service Cluster IP                                     | `""`        |
-| `inventree.service.loadBalancerIP`              | Inventree service Load Balancer IP                               | `""`        |
-| `inventree.service.loadBalancerSourceRanges`    | Inventree service Load Balancer sources                          | `[]`        |
-| `inventree.service.externalTrafficPolicy`       | Inventree service external traffic policy                        | `Cluster`   |
-| `inventree.service.annotations`                 | Additional custom annotations for Inventree service              | `{}`        |
-| `inventree.service.extraPorts`                  | Extra port to expose on Inventree service                        | `[]`        |
+| Name                                         | Description                                                      | Value       |
+| -------------------------------------------- | ---------------------------------------------------------------- | ----------- |
+| `master.networkPolicy.enabled`               | Deploy Inventree network policies                                | `true`      |
+| `master.networkPolicy.allowInterspaceAccess` | Allow communication between pods in different namespaces         | `true`      |
+| `master.networkPolicy.extraIngress`          | Add extra ingress rules to the NetworkPolicy                     | `""`        |
+| `master.networkPolicy.extraEgress`           | Add extra ingress rules to the NetworkPolicy                     | `""`        |
+| `master.service.type`                        | Inventree service type                                           | `ClusterIP` |
+| `master.service.ports.http`                  | Inventree service HTTP port                                      | `1337`      |
+| `master.service.nodePorts.http`              | NodePort for the HTTP endpoint                                   | `""`        |
+| `master.service.sessionAffinity`             | Control where client requests go, to the same pod or round-robin | `None`      |
+| `master.service.sessionAffinityConfig`       | Additional settings for the sessionAffinity                      | `{}`        |
+| `master.service.clusterIP`                   | Inventree service Cluster IP                                     | `""`        |
+| `master.service.loadBalancerIP`              | Inventree service Load Balancer IP                               | `""`        |
+| `master.service.loadBalancerSourceRanges`    | Inventree service Load Balancer sources                          | `[]`        |
+| `master.service.externalTrafficPolicy`       | Inventree service external traffic policy                        | `Cluster`   |
+| `master.service.annotations`                 | Additional custom annotations for Inventree service              | `{}`        |
+| `master.service.extraPorts`                  | Extra port to expose on Inventree service                        | `[]`        |
 
-### Workers parameters
+### Inventree Workers parameters
 
 | Name                         | Description                                                                                                      | Value                              |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
@@ -151,6 +151,7 @@
 | `workers.tolerations`        | Tolerations for pod assignment                                                                                   | `[]`                               |
 | `workers.affinity`           | Affinity for pod assignment                                                                                      | `{}`                               |
 | `workers.imageRegistry`      | Container registry to use for all Inventree images                                                               | `ghcr.io`                          |
+| `workers.replicaCount`       | Number of Inventree replicas to deploy                                                                           | `1`                                |
 | `workers.image.registry`     | inventree worker image registry                                                                                  | `REGISTRY_NAME`                    |
 | `workers.image.repository`   | inventree worker image repository                                                                                | `REPOSITORY_NAME/inventree worker` |
 | `workers.image.digest`       | inventree worker image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`                               |
@@ -161,12 +162,6 @@
 | `workers.extraEnvVars`       | Extra environment variables to be set on Inventree containers                                                    | `[]`                               |
 | `workers.extraEnvVarsCM`     | ConfigMap with extra environment variables                                                                       | `""`                               |
 | `workers.extraEnvVarsSecret` | Secret with extra environment variables                                                                          | `""`                               |
-
-### Inventree deployment parameters
-
-| Name                   | Description                            | Value |
-| ---------------------- | -------------------------------------- | ----- |
-| `workers.replicaCount` | Number of Inventree replicas to deploy | `1`   |
 
 ### Storage parameters
 

@@ -220,22 +220,13 @@ postgresql:
   ## Enable persistence using Persistent Volume Claims
   ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
   ##
-  ## @param postgresql.primary.persistence.enabled Enable persistence using PVC
-  ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL volume
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-  ##   GKE, AWS & OpenStack)
-  ## @param postgresql.primary.persistence.accessMode PVC Access Mode for PostgreSQL volume
-  ## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
   primary:
     ## @skip postgresql.primary.extraEnvVars
     ## Array with extra environment variables, used to create the initial `roundcube` database; DO NOT EDIT; see `global.database` instead
     extraEnvVars: []
 
     initdb:
-      ## @skip postgresql.primary.initdb.scripts.create_roundcube_database.sh
+      ## @skip postgresql.primary.initdb.scripts
       ## DO NOT EDIT Script to create the roundcube database
       scripts: {}
 

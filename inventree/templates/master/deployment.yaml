@@ -6,10 +6,10 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ include "inventree.master.fullname" . }}
+  name: {{ include "inventree.names.master.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: hub
+    app.kubernetes.io/component: server
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
@@ -31,7 +31,9 @@ spec:
         app.kubernetes.io/component: master
         app.kubernetes.io/part-of: inventree
     spec:
-      serviceAccountName: {{ template "inventree.hubServiceAccountName" . }}
+      {{- if and .Values.master.serviceAccount (not (empty .Values.master.serviceAccount.create)) }}
+      serviceAccountName: {{ template "inventree.master.ServiceAccountName" . }}
+      {{- end }}
       {{- include "inventree.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.master.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.master.hostAliases "context" $) | nindent 8 }}
@@ -101,35 +103,33 @@ spec:
                   name: ""
                   key: ""
             - name: INVENTREE_ADMIN_USER
-              value: {{ coalesce .Values.proxy.service.api.ports.http .Values.proxy.service.api.port | quote }}
-            - name: HUB_SERVICE_PORT
-              value: {{  coalesce .Values.master.service.ports.http .Values.master.service.port  | quote }}
+              value: ""
             - name: INVENTREE_DEBUG
               value: ""
             - name: INVENTREE_LOG_LEVEL
               value: ""
             - name: INVENTREE_DB_ENGINE
-              value: { include "inventree.db.engine" . }
+              value: {{ include "inventree.db.engine" . }}
             - name: INVENTREE_DB_NAME
-              value: ""
+              value: {{ include "inventree.db.name" . | quote }}
             - name: INVENTREE_DB_HOST
-              value: ""
+              value: {{ include "inventree.db.host" . }}
             - name: INVENTREE_DB_PORT
-              value: ""
+              value: {{ include "inventree.db.port" . | quote }}
             - name: INVENTREE_DB_USER
               value: ""
             - name: INVENTREE_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: ""
-                  key: ""
+                  name: {{ include "common.secrets.name" ( dict "existingSecret" .Values.master.existingSecret "defaultNameSuffix" "master" "context" $ ) }}
+                  key: {{ include "common.secrets.key" ( dict "existingSecret" .Values.master.existingSecret "key" "key" ) }}
             - name: INVENTREE_GUNICORN_TIMEOUT
               value: ""
             - name: INVENTREE_AUTO_UPDATE
               value: ""
             {{- if .Values.redis.enabled }}
             - name: INVENTREE_CACHE_HOST
-              value: {{ printf "%s-master" (include "common.names.fullname" .Subchart.redis) }}
+              value: {{ printf "%s-redis-master" (include "common.names.fullname" .) }}
             - name: INVENTREE_CACHE_PORT
               value: {{ coalesce .Values.redis.master.service.ports.redis .Values.redis.master.service.port | quote }}
             {{- end }}
@@ -154,7 +154,7 @@ spec:
           {{- else if .Values.master.startupProbe.enabled }}
           startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.master.startupProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
-              path: {{ .Values.master.baseUrl | trimSuffix "/" }}/hub/health
+              path: {{ .Values.master.baseUrl | trimSuffix "/" }}
               port: http
           {{- end }}
           {{- if .Values.master.customLivenessProbe }}
@@ -162,7 +162,7 @@ spec:
           {{- else if .Values.master.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.master.livenessProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
-              path: {{ .Values.master.baseUrl | trimSuffix "/" }}/hub/health
+              path: {{ .Values.master.baseUrl | trimSuffix "/" }}
               port: http
           {{- end }}
           {{- if .Values.master.customReadinessProbe }}
@@ -170,19 +170,13 @@ spec:
           {{- else if .Values.master.readinessProbe.enabled }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.master.readinessProbe "enabled") "context" $) | nindent 12 }}
             httpGet:
-              path: {{ .Values.master.baseUrl | trimSuffix "/" }}/hub/health
+              path: {{ .Values.master.baseUrl | trimSuffix "/" }}
               port: http
           {{- end }}
           {{- end }}
           volumeMounts:
-            - mountPath: /etc/jupyterhub/jupyterhub_config.py
-              subPath: jupyterhub_config.py
-              name: config
-            - mountPath: /etc/jupyterhub/z2jh.py
-              subPath: z2jh.py
-              name: config
-            - mountPath: /usr/local/etc/jupyterhub/secret/
-              name: secret
+            - name: data
+              mountPath: /home/inventree/data
           {{- if .Values.master.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -190,12 +184,9 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.master.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
-        - name: config
-          configMap:
-            name: {{ include "jupyterhub.hubConfigmapName" . }}
-        - name: secret
-          secret:
-            secretName: {{ include "jupyterhub.hubSecretName" . }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: inventree-data
         {{- if .Values.master.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumes "context" $) | nindent 8 }}
         {{- end }}

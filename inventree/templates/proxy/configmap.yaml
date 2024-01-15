@@ -3,8 +3,8 @@ Copyright VMware, Inc.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if .Values.proxy.einventree-proxy-prod-conf }}
-{{- if eq .Values.proxy.existingServerBlockConfigmap "inventree-proxy-prod-conf" }}
+{{- if .Values.proxy.enabled }}
+{{- if or (not .Values.proxy.existingServerBlockConfigmap) (eq .Values.proxy.existingServerBlockConfigmap "inventree-proxy-prod-conf") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

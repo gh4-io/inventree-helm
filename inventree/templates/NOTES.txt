@@ -4,6 +4,8 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 ** Please be patient while the chart is being deployed **
 
+{{ if false }}
+
 {{- if .Values.proxy.ingress.enabled }}
 
 1. Get the inventree URL indicated on the Ingress Rule and associate it to your cluster external IP:
@@ -61,3 +63,5 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 {{- include "common.errors.upgrade.passwords.empty" (dict "validationErrors" $passwordValidationErrors "context" $) -}}
 {{- include "inventree.validateValues" . }}
+
+{{ end }}

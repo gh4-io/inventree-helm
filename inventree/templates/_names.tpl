@@ -17,10 +17,10 @@ Usage:
 
 
 {{- define "inventree.names.master.fullname" -}}
-{{ include "inventree.names.dependency.fullname" (dict "chartName" "server" "chartValues" .Values.master "context" $) }}
+{{ include "common.names.dependency.fullname" (dict "chartName" "master" "chartValues" .Values.master "context" $) }}
 {{- end -}}
 
 {{- define "inventree.names.workers.fullname" -}}
-{{ include "inventree.names.dependency.fullname" (dict "chartName" "worker" "chartValues" .Values.workers "context" $) }}
+{{ include "common.names.dependency.fullname" (dict "chartName" "worker" "chartValues" .Values.workers "context" $) }}
 {{- end -}}
 

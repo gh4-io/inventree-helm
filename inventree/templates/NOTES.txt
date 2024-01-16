@@ -42,15 +42,19 @@ APP VERSION: {{ .Chart.AppVersion }}
 {{- end }}
 {{- end }}
 
+{{- end }}
+
 2. Login with the following admin user below to create a Notebook:
 
-  echo Admin user: {{ .Values.hub.adminUser }}
-  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "common.names.fullname" . }}-hub -o jsonpath="{.data['values\.yaml']}" | base64 -d | awk -F: '/password/ {gsub(/[ \t]+/, "", $2);print $2}')
+  echo Admin user: {{ .Values.master.adminUser }}
+  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "common.names.fullname" . }}-master -o jsonpath="{.data['values\.yaml']}" | base64 -d | awk -F: '/adminPassword/ {gsub(/[ \t]+/, "", $2);print $2}')
 
-{{- include "common.warnings.rollingTag" .Values.hub.image }}
+{{- include "common.warnings.rollingTag" .Values.master.image }}
 {{- include "common.warnings.rollingTag" .Values.proxy.image }}
-{{- include "common.warnings.rollingTag" .Values.singleuser.image }}
-{{- include "common.warnings.rollingTag" .Values.auxiliaryImage }}
+{{- include "common.warnings.rollingTag" .Values.workers.image }}
+{{- include "common.warnings.rollingTag" .Values.redis.image }}
+
+{{- if false }}
 
 {{- $passwordValidationErrors := list -}}
 

@@ -83,18 +83,18 @@ master:
   ## @param master.baseUrl Inventree base URL
   ##
   baseUrl: /
-  ## @param master.adminUser Inventree Dummy authenticator admin user
+  ## @param master.adminEmail Inventree administrator email address
+  ##
+  adminEmail: admin@example.com
+  ## @param master.adminUser Inventree authenticator admin user
   ##
   adminUser: admin
-  ## @param master.password Inventree Dummy authenticator password
+  ## @param master.password Inventree authenticator password
   ##
   password: ""
   ## @param master.secret
   ##
   secret: ""
-  ## @param master.existingSecret
-  ##
-  existingSecret: {}
   ## Configuration file passed to the master. This will be used by the jupyterhub_config.py file
   ## This configuration uses the values for the `singleuser` section. In the upstream chart the
   ## values.yaml file is mounted in the inventree container. This is chart, we tried to separate both
@@ -204,7 +204,7 @@ master:
   ## @param master.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
   ##
   containerSecurityContext:
-    enabled: true
+    enabled: false
     runAsUser: 1001
     runAsNonRoot: true
     privileged: false
@@ -220,7 +220,7 @@ master:
   ## @param master.podSecurityContext.fsGroup Set Inventree pod's Security Context fsGroup
   ##
   podSecurityContext:
-    enabled: true
+    enabled: false
     fsGroup: 1001
   ## @param master.lifecycleHooks LifecycleHooks for the Inventree container to automate configuration before or after startup
   ##
@@ -319,7 +319,10 @@ master:
   ##       - name: portname
   ##         containerPort: 1234
   ##
-  initContainers: []
+  initContainers: 
+    - name: init
+      image: inventree/inventree
+      command: ['invoke', 'update']
   ## @param master.sidecars Add additional sidecar containers to the Inventree pod
   ## Example:
   ## sidecars:
@@ -331,7 +334,73 @@ master:
   ##         containerPort: 1234
   ##
   sidecars: []
-
+  ## Persistence parameters
+  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    ## @param master.persistence.enabled Enable persistence on Inventree; master nodes using Persistent Volume Claims
+    ##
+    enabled: true
+    ## @param master.persistence.medium Provide a medium for `emptyDir` volumes.
+    ##
+    medium: ""
+    ## @param master.persistence.sizeLimit Set this to enable a size limit for `emptyDir` volumes.
+    ##
+    sizeLimit: ""
+    ## @param master.persistence.path The path the volume will be mounted at on Inventree; master containers
+    ## NOTE: Useful when using different Inventree; images
+    ##
+    path: /data
+    ## @param master.persistence.subPath The subdirectory of the volume to mount on Inventree; master containers
+    ## NOTE: Useful in dev environments
+    ##
+    subPath: ""
+    ## @param master.persistence.subPathExpr Used to construct the subPath subdirectory of the volume to mount on Inventree; master containers
+    ##
+    subPathExpr: ""
+    ## @param master.persistence.storageClass Persistent Volume storage class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+    ##
+    storageClass: ""
+    ## @param master.persistence.accessModes Persistent Volume access modes
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param master.persistence.size Persistent Volume size
+    ##
+    size: 8Gi
+    ## @param master.persistence.annotations Additional custom annotations for the PVC
+    ##
+    annotations: {}
+    ## @param master.persistence.labels Additional custom labels for the PVC
+    ##
+    labels: {}
+    ## @param master.persistence.selector Additional labels to match for the PVC
+    ## e.g:
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+    selector: {}
+    ## @param master.persistence.dataSource Custom PVC data source
+    ##
+    dataSource: {}
+    ## @param master.persistence.existingClaim Use a existing PVC which must be created manually before bound
+    ## NOTE: requires master.persistence.enabled: true
+    ##
+    existingClaim: ""
+  ## persistentVolumeClaimRetentionPolicy
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+  ## @param master.persistentVolumeClaimRetentionPolicy.enabled Controls if and how PVCs are deleted during the lifecycle of a StatefulSet
+  ## @param master.persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  ## @param master.persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  ##
+  persistentVolumeClaimRetentionPolicy:
+    enabled: false
+    whenScaled: Retain
+    whenDeleted: Retain
   ## @section Inventree RBAC parameters
 
   ## ServiceAccount parameters
@@ -523,7 +592,39 @@ workers:
   ## @param workers.extraEnvVarsSecret Secret with extra environment variables
   ##
   extraEnvVarsSecret: ""
-
+    ## inventree containers' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param workers.containerSecurityContext.enabled Enabled containers' Security Context
+  ## @param workers.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+  ## @param workers.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+  ## @param workers.containerSecurityContext.privileged Set container's Security Context privileged
+  ## @param workers.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+  ## @param workers.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+  ## @param workers.containerSecurityContext.capabilities.drop List of capabilities to be dropped
+  ## @param workers.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
+  ## inventree pods' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param workers.podSecurityContext.enabled Enabled Inventree pods' Security Context
+  ## @param workers.podSecurityContext.fsGroup Set Inventree pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## @param workers.lifecycleHooks LifecycleHooks for the Inventree container to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
     ## @section Inventree RBAC parameters
 
   ## ServiceAccount parameters
@@ -672,7 +773,7 @@ postgresql:
     persistence:
       ## @param postgresql.primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
       ##
-      enabled: true
+      enabled: false
       ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
       ##
       existingClaim: ""

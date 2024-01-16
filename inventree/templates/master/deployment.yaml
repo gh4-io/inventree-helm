@@ -20,7 +20,7 @@ spec:
   {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.master.podLabels .Values.commonLabels ) "context" . ) }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
-      app.kubernetes.io/component: hub
+      app.kubernetes.io/component: master
   template:
     metadata:
       annotations:
@@ -67,6 +67,9 @@ spec:
       {{- if .Values.master.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.master.terminationGracePeriodSeconds }}
       {{- end }}
+      {{- if .Values.master.initContainers }}
+      initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.master.initContainers "context" $) | nindent 8 }}
+      {{- end }}
       containers:
         - name: master
           image: {{ template "inventree.master.image" . }}
@@ -96,18 +99,15 @@ spec:
               containerPort: {{ coalesce .Values.master.containerPorts.http .Values.master.containerPort }}
           env:
             - name: INVENTREE_ADMIN_EMAIL
-              value: ""
+              value: {{ .Values.master.adminEmail }}
             - name: INVENTREE_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ""
-                  key: ""
+              valueFrom: {{ include "inventree.admin.secret" . | nindent 16 }}
             - name: INVENTREE_ADMIN_USER
-              value: ""
+              value: {{ .Values.master.adminUser }}
             - name: INVENTREE_DEBUG
-              value: ""
+              value: "True"
             - name: INVENTREE_LOG_LEVEL
-              value: ""
+              value: "INFO"
             - name: INVENTREE_DB_ENGINE
               value: {{ include "inventree.db.engine" . }}
             - name: INVENTREE_DB_NAME
@@ -117,16 +117,13 @@ spec:
             - name: INVENTREE_DB_PORT
               value: {{ include "inventree.db.port" . | quote }}
             - name: INVENTREE_DB_USER
-              value: ""
+              value: {{ include "inventree.db.user" . }}
             - name: INVENTREE_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.secrets.name" ( dict "existingSecret" .Values.master.existingSecret "defaultNameSuffix" "master" "context" $ ) }}
-                  key: {{ include "common.secrets.key" ( dict "existingSecret" .Values.master.existingSecret "key" "key" ) }}
+              valueFrom: {{ include "inventree.db.secret" . | nindent 16 }}
             - name: INVENTREE_GUNICORN_TIMEOUT
-              value: ""
+              value: "2"
             - name: INVENTREE_AUTO_UPDATE
-              value: ""
+              value: "False"
             {{- if .Values.redis.enabled }}
             - name: INVENTREE_CACHE_HOST
               value: {{ printf "%s-redis-master" (include "common.names.fullname" .) }}
@@ -186,7 +183,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: inventree-data
+            claimName: {{ include "common.names.fullname" . }}-data
         {{- if .Values.master.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumes "context" $) | nindent 8 }}
         {{- end }}

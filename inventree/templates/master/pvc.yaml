@@ -1,0 +1,31 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-data
+  namespace: {{ include "common.names.namespace" . | quote }}
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.master.persistence.labels .Values.commonLabels ) "context" . ) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: pvc
+  {{- if .Values.master.persistence.annotations }}
+  annotations: {{- toYaml .Values.master.persistence.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.master.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.master.persistence.size | quote }}
+  {{- if .Values.master.persistence.selector }}
+  selector: {{- include "common.tplvalues.render" (dict "value" .Values.master.persistence.selector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.master.persistence.dataSource }}
+  dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.master.persistence.dataSource "context" $) | nindent 4 }}
+  {{- end }}
+  {{- include "common.storage.class" (dict "persistence" .Values.master.persistence "global" .Values.global) | nindent 2 }}

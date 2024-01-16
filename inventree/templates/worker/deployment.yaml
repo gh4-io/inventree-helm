@@ -1,0 +1,135 @@
+{{- /*
+Copyright VMware, Inc.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+
+{{- if .Values.workers.enabled }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "inventree.names.workers.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- $versionLabel := dict "app.kubernetes.io/version" ( include "common.images.version" ( dict "imageRoot" .Values.master.image "chart" .Chart ) ) }}
+  {{- $labels := include "common.tplvalues.merge" ( dict "values" ( list .Values.commonLabels $versionLabel .Values.workers.commonLabels ) "context" . ) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $labels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: worker
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" ( list .Values.commonAnnotations .Values.workers.commonAnnotations ) "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.master.updateStrategy }}
+  strategy: {{- toYaml .Values.workers.updateStrategy | nindent 4 }}
+  {{- end }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.workers.podLabels .Values.commonLabels ) "context" . ) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.workers.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.workers.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: inventree
+    spec:
+      {{- if or .Values.affinity .Values.master.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" (coalesce .Values.master.affinity .Values.affinity) "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.master.podAntiAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.master.nodeAffinityPreset.type "key" .Values.master.nodeAffinityPreset.key "values" .Values.master.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.workers.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.workers.terminationGracePeriodSeconds }}
+      {{- end }}
+      containers:
+        - name: master
+          image: {{ template "inventree.workers.image" . }}
+          imagePullPolicy: {{ .Values.workers.image.pullPolicy }}
+          {{- if .Values.workers.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.workers.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.workers.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.workers.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.workers.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.workers.command "context" $) | nindent 12 }}
+          {{- else }}
+          command: []
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.workers.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.workers.args "context" $) | nindent 12 }}
+          {{- else }}
+          args: []
+          {{- end }}
+          env:
+            - name: INVENTREE_ADMIN_EMAIL
+              value: {{ .Values.master.adminEmail }}
+            - name: INVENTREE_ADMIN_PASSWORD
+              valueFrom: {{ include "inventree.admin.secret" . | nindent 16 }}
+            - name: INVENTREE_ADMIN_USER
+              value: {{ .Values.master.adminUser }}
+            - name: INVENTREE_DEBUG
+              value: "True"
+            - name: INVENTREE_LOG_LEVEL
+              value: "INFO"
+            - name: INVENTREE_DB_ENGINE
+              value: {{ include "inventree.db.engine" . }}
+            - name: INVENTREE_DB_NAME
+              value: {{ include "inventree.db.name" . | quote }}
+            - name: INVENTREE_DB_HOST
+              value: {{ include "inventree.db.host" . }}
+            - name: INVENTREE_DB_PORT
+              value: {{ include "inventree.db.port" . | quote }}
+            - name: INVENTREE_DB_USER
+              value: {{ include "inventree.db.user" . }}
+            - name: INVENTREE_DB_PASSWORD
+              valueFrom: {{ include "inventree.db.secret" . | nindent 16 }}
+            - name: INVENTREE_GUNICORN_TIMEOUT
+              value: "2"
+            - name: INVENTREE_AUTO_UPDATE
+              value: "False"
+            {{- if .Values.redis.enabled }}
+            - name: INVENTREE_CACHE_HOST
+              value: {{ printf "%s-redis-master" (include "common.names.fullname" .) }}
+            - name: INVENTREE_CACHE_PORT
+              value: {{ coalesce .Values.redis.master.service.ports.redis .Values.redis.master.service.port | quote }}
+            {{- end }}
+            {{- if .Values.master.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.master.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.master.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.master.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.master.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.master.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/inventree/data
+          {{- if .Values.master.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        {{- if .Values.master.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.master.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "common.names.fullname" . }}-data
+        {{- if .Values.master.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+
+{{- end -}}

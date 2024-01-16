@@ -10,7 +10,7 @@ Return the proper Docker Image Registry Secret Names
 {{- if .Values.externalDatabase.enabled }}
 {{- .Values.externalDatabase.host }}
 {{- else if .Values.postgresql.enabled }}
-{{- include "postgresql.v1.primary.fullname" .subChart.postgresql }}
+{{- template "postgresql.v1.primary.fullname" .Subcharts.postgresql }}
 {{- end -}}
 {{- end -}}
 
@@ -21,7 +21,7 @@ Return the proper Docker Image Registry Secret Names
 {{- else if .Values.postgresql.enabled }}
 {{- print "postgresql" }}
 {{- else }}
-{{- print "sqlite" }}
+{{- print "sqlite3" }}
 {{- end -}}
 {{- end -}}
 
@@ -39,22 +39,28 @@ Return the proper Docker Image Registry Secret Names
 {{- if .Values.externalDatabase.enabled }}
 {{- .Values.externalDatabase.port }}
 {{- else if .Values.postgresql.enabled }}
-{{- template "postgresql.v1.service.port" .subChart.postgresql }}
+{{- template "postgresql.v1.service.port" .Subcharts.postgresql }}
 {{- end -}}
 {{- end -}}
 
 {{- define "inventree.db.user" -}}
-{{- if .Values.externalDatabase.enabled }}
-{{- .Values.externalDatabase.username }}
-{{- else if .Values.postgresql.enabled }}
-{{- .Values.postgresql.auth.username }}
-{{- end -}}
+{{ ternary .Values.externalDatabase.username .Values.postgresql.auth.username .Values.externalDatabase.enabled }}
 {{- end -}}
 
 {{- define "inventree.db.secret" -}}
 {{- if .Values.externalDatabase.enabled }}
-{{- coalesce . }}
+secretKeyRef:
+  name: {{ include "common.secrets.name" ( dict "existingSecret" .Values.master.existingSecret "defaultNameSuffix" "master" "context" $ ) }}
+  key: {{ include "common.secrets.key" ( dict "existingSecret" .Values.master.existingSecret "key" "key" ) }}
 {{- else if .Values.postgresql.enabled }}
-{{- .Values.postgresql.auth.username }}
+secretKeyRef:
+  name: {{ include "common.secrets.name" ( dict "existingSecret" .Values.master.existingSecret "defaultNameSuffix" "master" "context" $ ) }}
+  key: {{ include "common.secrets.key" ( dict "existingSecret" .Values.master.existingSecret "key" "key" ) }}
 {{- end -}}
+{{- end -}}
+
+{{- define "inventree.admin.secret" -}}
+secretKeyRef:
+  name: {{ include "common.secrets.name" ( dict "existingSecret" .Values.master.existingSecret "defaultNameSuffix" "master" "context" $ ) }}
+  key: {{ include "common.secrets.key" ( dict "existingSecret" .Values.master.password "key" "adminPassword" ) }}
 {{- end -}}

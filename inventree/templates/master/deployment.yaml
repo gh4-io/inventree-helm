@@ -24,6 +24,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- if .Values.master.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.master.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
@@ -67,8 +68,21 @@ spec:
       {{- if .Values.master.terminationGracePeriodSeconds }}
       terminationGracePeriodSeconds: {{ .Values.master.terminationGracePeriodSeconds }}
       {{- end }}
+      initContainers: 
+        - name: init
+          image: inventree/inventree
+          command: ['invoke', 'update']
+          envFrom:
+            - configMapRef:
+                name: {{ include "common.names.fullname" . }}
+            - secretRef:
+                name: {{ include "common.names.fullname" . }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/inventree/data
+          
       {{- if .Values.master.initContainers }}
-      initContainers: {{- include "common.tplvalues.render" (dict "value" .Values.master.initContainers "context" $) | nindent 8 }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.master.initContainers "context" $) | nindent 8 }}
       {{- end }}
       containers:
         - name: master
@@ -98,42 +112,14 @@ spec:
             - name: http
               containerPort: {{ coalesce .Values.master.containerPorts.http .Values.master.containerPort }}
           env:
-            - name: INVENTREE_ADMIN_EMAIL
-              value: {{ .Values.master.adminEmail }}
-            - name: INVENTREE_ADMIN_PASSWORD
-              valueFrom: {{ include "inventree.admin.secret" . | nindent 16 }}
-            - name: INVENTREE_ADMIN_USER
-              value: {{ .Values.master.adminUser }}
-            - name: INVENTREE_DEBUG
-              value: "True"
-            - name: INVENTREE_LOG_LEVEL
-              value: "INFO"
-            - name: INVENTREE_DB_ENGINE
-              value: {{ include "inventree.db.engine" . }}
-            - name: INVENTREE_DB_NAME
-              value: {{ include "inventree.db.name" . | quote }}
-            - name: INVENTREE_DB_HOST
-              value: {{ include "inventree.db.host" . }}
-            - name: INVENTREE_DB_PORT
-              value: {{ include "inventree.db.port" . | quote }}
-            - name: INVENTREE_DB_USER
-              value: {{ include "inventree.db.user" . }}
-            - name: INVENTREE_DB_PASSWORD
-              valueFrom: {{ include "inventree.db.secret" . | nindent 16 }}
-            - name: INVENTREE_GUNICORN_TIMEOUT
-              value: "2"
-            - name: INVENTREE_AUTO_UPDATE
-              value: "False"
-            {{- if .Values.redis.enabled }}
-            - name: INVENTREE_CACHE_HOST
-              value: {{ printf "%s-redis-master" (include "common.names.fullname" .) }}
-            - name: INVENTREE_CACHE_PORT
-              value: {{ coalesce .Values.redis.master.service.ports.redis .Values.redis.master.service.port | quote }}
-            {{- end }}
             {{- if .Values.master.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.master.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
           envFrom:
+            - configMapRef:
+                name: {{ include "common.names.fullname" . }}
+            - secretRef:
+                name: {{ include "common.names.fullname" . }}
             {{- if .Values.master.extraEnvVarsCM }}
             - configMapRef:
                 name: {{ include "common.tplvalues.render" (dict "value" .Values.master.extraEnvVarsCM "context" $) }}
@@ -187,3 +173,4 @@ spec:
         {{- if .Values.master.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.master.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
+  replicas: {{ default .Values.master.replicas 1 }}

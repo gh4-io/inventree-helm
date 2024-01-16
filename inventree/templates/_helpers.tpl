@@ -31,7 +31,7 @@ Return the proper Docker Image Registry Secret Names
 {{- else if .Values.postgresql.enabled }}
 {{- .Values.postgresql.auth.database }}
 {{- else }}
-{{- print "/home/inventree/database.sqlite3" }}
+{{- print "/home/inventree/data/database.sqlite3" }}
 {{- end -}}
 {{- end -}}
 

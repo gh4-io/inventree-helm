@@ -95,6 +95,18 @@ master:
   ## @param master.secret
   ##
   secret: ""
+  ## Plugins
+  ##
+  plugins:
+    ## @param master.plugins.enabled
+    ##
+    enabled: false
+    ## @param master.plugins.file
+    ##
+    file: ""
+    ## @param master.plugins.dir
+    ##
+    dir: ""
   ## Configuration file passed to the master. This will be used by the jupyterhub_config.py file
   ## This configuration uses the values for the `singleuser` section. In the upstream chart the
   ## values.yaml file is mounted in the inventree container. This is chart, we tried to separate both
@@ -319,10 +331,7 @@ master:
   ##       - name: portname
   ##         containerPort: 1234
   ##
-  initContainers: 
-    - name: init
-      image: inventree/inventree
-      command: ['invoke', 'update']
+  initContainers: {}
   ## @param master.sidecars Add additional sidecar containers to the Inventree pod
   ## Example:
   ## sidecars:

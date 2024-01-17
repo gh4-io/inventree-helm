@@ -19,12 +19,12 @@ Return the proper image name
         {{- $registryName = .global.imageDigest -}}
     {{- end -}}
 {{- end -}}
-{{- if .imageRoot.tag -}}
-    {{- $termination := .imageRoot.tag | toString -}}
+{{- if .imageRoot.tag }}
+    {{- $termination = .imageRoot.tag | toString  -}}
 {{- end -}}
 {{- if .imageRoot.digest }}
     {{- $separator = "@" -}}
-    {{- $termination = .imageRoot.digest | toString -}}
+    {{- $termination = .imageRoot.digest -}}
 {{- end -}}
 {{- if $registryName }}
     {{- printf "%s/%s%s%s" $registryName $repositoryName $separator $termination -}}

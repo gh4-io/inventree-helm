@@ -25,6 +25,7 @@ spec:
     metadata:
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- if .Values.master.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.master.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
@@ -70,7 +71,7 @@ spec:
       {{- end }}
       initContainers: 
         - name: init
-          image: inventree/inventree
+          image: {{ template "inventree.master.image" . }}
           command: ['invoke', 'update']
           envFrom:
             - configMapRef:

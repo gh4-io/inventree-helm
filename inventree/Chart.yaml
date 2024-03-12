@@ -2,8 +2,8 @@ apiVersion: v2
 name: inventree
 description: "Open-source Inventory Management System"
 type: application
-version: 0.0.2
-appVersion: 0.13.1
+version: 0.1.0
+appVersion: 0.14.1
 keywords:
   - inventree
   - asset

@@ -9,7 +9,7 @@ metadata:
   name: {{ include "inventree.names.master.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: server
+    app.kubernetes.io/component: master
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
@@ -72,7 +72,8 @@ spec:
       initContainers: 
         - name: init
           image: {{ template "inventree.master.image" . }}
-          command: ['invoke', 'update']
+          imagePullPolicy: IfNotPresent
+          command: [ "invoke", "update" ]
           envFrom:
             - configMapRef:
                 name: {{ include "common.names.fullname" . }}
@@ -81,10 +82,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /home/inventree/data
-          
-      {{- if .Values.master.initContainers }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.master.initContainers "context" $) | nindent 8 }}
-      {{- end }}
+        {{- if .Values.master.initContainers }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.master.initContainers "context" $) | nindent 8 }}
+        {{- end }}
       containers:
         - name: master
           image: {{ template "inventree.master.image" . }}

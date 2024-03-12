@@ -24,9 +24,17 @@ data:
         # If you are exposing this server to the internet, you should use HTTPS!
         # In which case, you should also set up a redirect from HTTP to HTTPS, and listen on port 443
         # See the Nginx documentation for more details
-        listen 80;
+        listen 8080;
+
+        {{- if .Values.proxy.dnsResolver }}
+        resolver {{ .Values.proxy.dnsResolver }};
+        {{- end  }}
 
         real_ip_header proxy_protocol;
+
+        set $upstream_proto http;
+        set $upstream_app {{ include "inventree.names.master.fullname" .}}.inventree.svc.cluster.local;
+        set $upstream_port {{ .Values.master.service.ports.http }};
 
         location / {
 
@@ -47,7 +55,7 @@ data:
             proxy_request_buffering off;
 
             # Do not touch this unless you have a specific reason - this and the docker-compose need to match
-            proxy_pass http://inventree-server:8000;
+            proxy_pass $upstream_proto://$upstream_app:$upstream_port;
         }
 
         # Redirect any requests for static files
@@ -76,7 +84,7 @@ data:
         location /auth {
             internal;
 
-            proxy_pass http://inventree-server:8000/auth/;
+            proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
             proxy_pass_request_body off;
             proxy_set_header Content-Length "";

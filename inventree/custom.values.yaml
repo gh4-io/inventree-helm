@@ -74,7 +74,7 @@ master:
   image:
     registry: ""
     repository: inventree/inventree
-    tag: '0.13.1'
+    tag: 0.13.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -341,7 +341,7 @@ master:
   ##       - name: portname
   ##         containerPort: 1234
   ##
-  initContainers: {}
+  initContainers: []
   ## @param master.sidecars Add additional sidecar containers to the Inventree pod
   ## Example:
   ## sidecars:
@@ -577,7 +577,7 @@ workers:
   image:
     registry: ""
     repository: inventree/inventree
-    tag: 0.13.1
+    tag: 0.13.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -766,7 +766,7 @@ postgresql:
   image:
     registry: ""
     repository: bitnami/postgresql
-    tag: 13.13.0
+    tag: 13.13.0-debian-11-r22
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -931,7 +931,7 @@ redis:
   image:
     registry: docker.io
     repository: bitnami/redis
-    tag: "7.2.4"
+    tag: 7.2.4-debian-11-r2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -946,6 +946,17 @@ redis:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
+    ## @param redis.master.initContainers Add additional init containers to the Inventree pods
+    ## Example:
+    ## initContainers:
+    ##   - name: your-image-name
+    ##     image: your-image
+    ##     imagePullPolicy: Always
+    ##     ports:
+    ##       - name: portname
+    ##         containerPort: 1234
+    ##
+    initContainers: []
 
 ## @section Proxy parameters
 ## Nginx Proxy configuration
@@ -953,7 +964,7 @@ redis:
 proxy:
   ## @param proxy.enabled Enable nginx proxy through nginx subchart. 
   ##
-  enabled: false
+  enabled: true
   ## @param proxy.nameOverride String to partially override nginx.fullname template (will maintain the release name)
   ##
   nameOverride: ""
@@ -989,7 +1000,7 @@ proxy:
   ## @param proxy.image.pullSecrets Specify docker-registry secret names as an array
   ##
   image:
-    registry: docker.io
+    registry: ""
     repository: bitnami/nginx
     tag: 1.25.3-debian-11-r4
     digest: ""
@@ -1058,13 +1069,27 @@ proxy:
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
   ##
-  affinity: {}
+  affinity: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: app.env/inventree
+                operator: In
+                values:
+                  - 'true'
+
   ## @param proxy.extraVolumes Array to add extra volumes
   ##
-  extraVolumes: []
+  extraVolumes: 
+    - name: data
+      persistentVolumeClaim:
+        claimName: inventree-data
   ## @param proxy.extraVolumeMounts Array to add extra mount
   ##
-  extraVolumeMounts: []
+  extraVolumeMounts: 
+    - name: data
+      mountPath: /var/www
   ## @param proxy.serverBlock Custom server block to be added to NGINX configuration
   ## PHP-FPM example server block:
   ## serverBlock: |-
@@ -1093,6 +1118,8 @@ proxy:
   ## NOTE: This will override staticSiteConfigmap
   ##
   staticSitePVC: ""
+
+  dnsResolver: "10.152.183.10"
 
   ## @section Traffic Exposure parameters
 

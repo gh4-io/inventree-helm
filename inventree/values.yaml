@@ -65,7 +65,7 @@ master:
   image:
     registry: ""
     repository: inventree/inventree
-    tag: 0.13.1
+    tag: 0.14.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -567,7 +567,7 @@ workers:
   image:
     registry: ""
     repository: inventree/inventree
-    tag: 0.13.1
+    tag: 0.14.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -1035,10 +1035,15 @@ proxy:
   affinity: {}
   ## @param proxy.extraVolumes Array to add extra volumes
   ##
-  extraVolumes: []
+  extraVolumes: 
+    - name: data
+      mountPath: /var/www
   ## @param proxy.extraVolumeMounts Array to add extra mount
   ##
-  extraVolumeMounts: []
+  extraVolumeMounts: 
+    - name: data
+      persistentVolumeClaim:
+        claimName: inventree-data
   ## @param proxy.serverBlock Custom server block to be added to NGINX configuration
   ## PHP-FPM example server block:
   ## serverBlock: |-
@@ -1067,6 +1072,9 @@ proxy:
   ## NOTE: This will override staticSiteConfigmap
   ##
   staticSitePVC: ""
+  ## @param proxy.dnsResolver Adds dns resolver into serverBlock
+  ##
+  dnsResolver: ""
 
   ## @section Traffic Exposure parameters
 

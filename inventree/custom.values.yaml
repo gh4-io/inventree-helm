@@ -1,0 +1,1204 @@
+## Default values for Inventree 
+
+
+## @section Global parameters
+## Global common parameters (see Bitnamis common chart)
+## @param global.imageRegistry Global container image registry
+## @param global.imagePullSecrets Global container image pull secret
+## @param global.storageClass Global storageClass to use for persistent volumes
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: microk8s-hostpath
+  imageTag: ""
+
+## @section Common parameters
+
+## @param kubeVersion Force target Kubernetes version (using Helm capabilities if not set)
+kubeVersion: ""
+## @param nameOverride String to partially override inventree.fullname include (will maintain the release name)
+nameOverride: ""
+## @param fullnameOverride String to fully override inventree.fullname template
+fullnameOverride: ""
+## @param commonLabels Add labels to all the deployed resources
+commonLabels: {}
+## @param commonAnnotations Add annotations to all the deployed resources
+commonAnnotations: {}
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: []
+## Enable diagnostic mode in the deployment(s)/daemonset(s)
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the the deployment(s)/daemonset(s)
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the the deployment(s)/daemonset(s)
+  ##
+  args:
+    - infinity
+
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+## @param affinity Affinity for pod assignment
+affinity: 
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: app.env/inventree
+              operator: In
+              values:
+                - 'true'
+
+## @section Inventree Server parameters
+## Inventree server configurations
+##
+master:
+  ## @param master.commonLabels
+  commonLabels: {}
+  ## @param master.image.registry [default: REGISTRY_NAME] Inventree image registry
+  ## @param master.image.repository [default: REPOSITORY_NAME/inventree] Inventree image repository
+  ## @skip master.image.tag Inventree image tag (immutable tags are recommended)
+  ## @param master.image.digest Inventree image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param master.image.pullPolicy Inventree image pull policy
+  ## @param master.image.pullSecrets Inventree image pull secrets
+  ##
+  image:
+    registry: ""
+    repository: inventree/inventree
+    tag: 0.13.2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##  - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param master.baseUrl Inventree base URL
+  ##
+  baseUrl: /
+  ## @param master.adminEmail Inventree administrator email address
+  ##
+  adminEmail: admin@gh4.io
+  ## @param master.adminUser Inventree authenticator admin user
+  ##
+  adminUser: admin
+  ## @param master.password Inventree authenticator password
+  ##
+  password: password
+  ## @param master.secret
+  ##
+  secret: |
+    %I$DO'ltRA;bqD]m;aoA4Xt"tiF%#.NLbo'QY|AMBY5\'k/Ho5sN7bxo[Idn86Ts(u&JR|k<\CNVDs*2?\f99mn+64NX:m't2iX4
+  ## Plugins
+  ##
+  plugins:
+    ## @param master.plugins.enabled
+    ##
+    enabled: true
+    ## @param master.plugins.file
+    ##
+    file: ""
+    ## @param master.plugins.dir
+    ##
+    dir: ""
+  ## Configuration file passed to the master. This will be used by the jupyterhub_config.py file
+  ## This configuration uses the values for the `singleuser` section. In the upstream chart the
+  ## values.yaml file is mounted in the inventree container. This is chart, we tried to separate both
+  ## configuration so we could follow the Bitnami value standards
+  ## @param master.configuration [string] Inventree configuration file (to be used by jupyterhub_config.py)
+  ##
+  configuration: ""
+  ## @param master.existingConfigmap Configmap with Inventree init scripts (replaces the scripts in templates/inventree/configmap.yml)
+  ##
+  existingConfigmap: ""
+  ## @param master.existingSecret Secret with inventree configuration (replaces the master.configuration value) and proxy token
+  ##
+  existingSecret: ""
+  ## @param master.command Override Inventree default command
+  ##
+  command: []
+  ## @param master.args Override Inventree default args
+  ##
+  args: []
+  ## @param master.extraEnvVars Add extra environment variables to the Inventree container
+  ## Example:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param master.extraEnvVarsCM Name of existing ConfigMap containing extra env vars
+  ##
+  extraEnvVarsCM: ""
+  ## @param master.extraEnvVarsSecret Name of existing Secret containing extra env vars
+  ##
+  extraEnvVarsSecret: ""
+  ## @param master.containerPorts.http Inventree container port
+  ##
+  containerPorts:
+    http: 8000
+  ## Configure extra options for Inventree containers' liveness, readiness and startup probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
+  ## @param master.startupProbe.enabled Enable startupProbe on Inventree containers
+  ## @param master.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param master.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param master.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param master.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param master.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param master.livenessProbe.enabled Enable livenessProbe on Inventree containers
+  ## @param master.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param master.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param master.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param master.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param master.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param master.readinessProbe.enabled Enable readinessProbe on Inventree containers
+  ## @param master.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param master.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param master.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param master.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param master.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+  ## @param master.customStartupProbe Override default startup probe
+  ##
+  customStartupProbe: {}
+  ## @param master.customLivenessProbe Override default liveness probe
+  ##
+  customLivenessProbe: {}
+  ## @param master.customReadinessProbe Override default readiness probe
+  ##
+  customReadinessProbe: {}
+  ## Inventree resource requests and limits
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param master.resources.limits The resources limits for the Inventree containers
+  ## @param master.resources.requests The requested resources for the Inventree containers
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## inventree containers' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param master.containerSecurityContext.enabled Enabled containers' Security Context
+  ## @param master.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+  ## @param master.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+  ## @param master.containerSecurityContext.privileged Set container's Security Context privileged
+  ## @param master.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+  ## @param master.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+  ## @param master.containerSecurityContext.capabilities.drop List of capabilities to be dropped
+  ## @param master.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
+  ## inventree pods' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param master.podSecurityContext.enabled Enabled Inventree pods' Security Context
+  ## @param master.podSecurityContext.fsGroup Set Inventree pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## @param master.lifecycleHooks LifecycleHooks for the Inventree container to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param master.hostAliases Add deployment host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param master.podLabels Add extra labels to the Inventree pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param master.podAnnotations Add extra annotations to the Inventree pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Pod affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## Allowed values: soft, hard
+  ## @param master.podAffinityPreset Pod affinity preset. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  podAffinityPreset: ""
+  ## Pod anti-affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ## @param master.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  podAntiAffinityPreset: soft
+  ## Node affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ## @param master.nodeAffinityPreset.type Node affinity preset type. Ignored if `master.affinity` is set. Allowed values: `soft` or `hard`
+  ## @param master.nodeAffinityPreset.key Node label key to match. Ignored if `master.affinity` is set
+  ## @param master.nodeAffinityPreset.values Node label values to match. Ignored if `master.affinity` is set
+  ##
+  nodeAffinityPreset:
+    type: ""
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param master.affinity  Affinity for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}
+  ## @param master.nodeSelector Node labels for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param master.tolerations Tolerations for pod assignment.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## @param master.topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param master.priorityClassName Priority Class Name
+  ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  ##
+  priorityClassName: ""
+  ## @param master.schedulerName Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param master.terminationGracePeriodSeconds Seconds Inventree pod needs to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param master.updateStrategy.type Update strategy - only really applicable for deployments with RWO PVs attached
+  ## @param master.updateStrategy.rollingUpdate Inventree deployment rolling update configuration parameters
+  ## If replicas = 1, an update can get "stuck", as the previous pod remains attached to the
+  ## PV, and the "incoming" pod can never start. Changing the strategy to "Recreate" will
+  ## terminate the single previous pod, so that the new, incoming pod can attach to the PV
+  ##
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate: {}
+  ## @param master.extraVolumes Optionally specify extra list of additional volumes for Inventree pods
+  ##
+  extraVolumes: []
+  ## @param master.extraVolumeMounts Optionally specify extra list of additional volumeMounts for Inventree container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param master.initContainers Add additional init containers to the Inventree pods
+  ## Example:
+  ## initContainers:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  initContainers: []
+  ## @param master.sidecars Add additional sidecar containers to the Inventree pod
+  ## Example:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## Persistence parameters
+  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    ## @param master.persistence.enabled Enable persistence on Inventree; master nodes using Persistent Volume Claims
+    ##
+    enabled: true
+    ## @param master.persistence.medium Provide a medium for `emptyDir` volumes.
+    ##
+    medium: ""
+    ## @param master.persistence.sizeLimit Set this to enable a size limit for `emptyDir` volumes.
+    ##
+    sizeLimit: ""
+    ## @param master.persistence.path The path the volume will be mounted at on Inventree; master containers
+    ## NOTE: Useful when using different Inventree; images
+    ##
+    path: /home/inventree/data
+    ## @param master.persistence.subPath The subdirectory of the volume to mount on Inventree; master containers
+    ## NOTE: Useful in dev environments
+    ##
+    subPath: ""
+    ## @param master.persistence.subPathExpr Used to construct the subPath subdirectory of the volume to mount on Inventree; master containers
+    ##
+    subPathExpr: ""
+    ## @param master.persistence.storageClass Persistent Volume storage class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+    ##
+    storageClass: ""
+    ## @param master.persistence.accessModes Persistent Volume access modes
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param master.persistence.size Persistent Volume size
+    ##
+    size: 8Gi
+    ## @param master.persistence.annotations Additional custom annotations for the PVC
+    ##
+    annotations: {}
+    ## @param master.persistence.labels Additional custom labels for the PVC
+    ##
+    labels: {}
+    ## @param master.persistence.selector Additional labels to match for the PVC
+    ## e.g:
+    ## selector:
+    ##   matchLabels:
+    ##     app: my-app
+    ##
+    selector: {}
+    ## @param master.persistence.dataSource Custom PVC data source
+    ##
+    dataSource: {}
+    ## @param master.persistence.existingClaim Use a existing PVC which must be created manually before bound
+    ## NOTE: requires master.persistence.enabled: true
+    ##
+    existingClaim: ""
+  ## persistentVolumeClaimRetentionPolicy
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
+  ## @param master.persistentVolumeClaimRetentionPolicy.enabled Controls if and how PVCs are deleted during the lifecycle of a StatefulSet
+  ## @param master.persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
+  ## @param master.persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
+  ##
+  persistentVolumeClaimRetentionPolicy:
+    enabled: false
+    whenScaled: Retain
+    whenDeleted: Retain
+  ## @section Inventree RBAC parameters
+
+  ## ServiceAccount parameters
+  ##
+  serviceAccount:
+    ## @param master.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param master.serviceAccount.name Override Inventree service account name
+    ## If not set and create is true, a name is generated using the fullname template
+    ##
+    name: ""
+    ## @param master.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ## Can be set to false if pods using this serviceAccount do not need to use K8s API
+    ##
+    automountServiceAccountToken: true
+    ## @param master.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+  ## RBAC resources
+  ##
+  rbac:
+    ## @param master.rbac.create Specifies whether RBAC resources should be created
+    ##
+    create: false
+    ## @param master.rbac.rules Custom RBAC rules to set
+    ## e.g:
+    ## rules:
+    ##   - apiGroups:
+    ##       - ""
+    ##     resources:
+    ##       - pods
+    ##     verbs:
+    ##       - get
+    ##       - list
+    ##
+    rules: []
+
+  ## @section Inventree Traffic Exposure Parameters
+
+  ## Network policy
+  ##
+  networkPolicy:
+    ## @param master.networkPolicy.enabled Deploy Inventree network policies
+    ##
+    enabled: true
+    ## @param master.networkPolicy.allowInterspaceAccess Allow communication between pods in different namespaces
+    ##
+    allowInterspaceAccess: true
+    ## @param master.networkPolicy.extraIngress Add extra ingress rules to the NetworkPolicy
+    ##
+    extraIngress: ""
+    ## @param master.networkPolicy.extraEgress [string] Add extra ingress rules to the NetworkPolicy
+    ##
+    extraEgress: |
+      ## Inventree --> Any IP:PORT
+      ##
+      - to:
+  service:
+    ## @param master.service.enabled Enables Inventree master service.
+    ##
+    enabled: true
+    ## @param master.service.type Inventree service type
+    ##
+    type: ClusterIP
+    ## @param master.service.ports.http Inventree service HTTP port
+    ##
+    ports:
+      http: 8000
+    ## @param master.service.nodePorts.http NodePort for the HTTP endpoint
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http: ""
+    ## @param master.service.sessionAffinity Control where client requests go, to the same pod or round-robin
+    ## Values: ClientIP or None
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+    ##
+    sessionAffinity: None
+    ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+    ## @param master.service.clusterIP Inventree service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP: ""
+    ## @param master.service.loadBalancerIP Inventree service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP: ""
+    ## @param master.service.loadBalancerSourceRanges Inventree service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param master.service.externalTrafficPolicy Inventree service external traffic policy
+    ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param master.service.annotations Additional custom annotations for Inventree service
+    ##
+    annotations: {}
+    ## @param master.service.extraPorts Extra port to expose on Inventree service
+    ##
+    extraPorts: []
+
+## @section Inventree Workers parameters
+## Invintree Workers configurations
+##
+workers: 
+  ## @param workers.enabled
+  ##
+  enabled: true
+
+  ## @param workers.nameOverride String to partially override inventree.fullname include (will maintain the release name)
+  nameOverride: ""
+
+  ## @param workers.fullnameOverride String to fully override inventree.fullname template
+  fullnameOverride: ""
+
+  ## @param workers.commonLabels Add labels to all the deployed resources
+  commonLabels: {}
+
+  ## @param workers.commonAnnotations Add annotations to all the deployed resources
+  commonAnnotations: {}
+
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ## @param workers.tolerations Tolerations for pod assignment
+  tolerations: []
+
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## @param workers.affinity Affinity for pod assignment
+  affinity: {}
+
+  ## @param workers.imageRegistry Container registry to use for all Inventree images
+  imageRegistry: ghcr.io
+
+  ## @param workers.replicaCount Number of Inventree replicas to deploy
+  ##
+  replicaCount: 1
+
+  ## @param workers.image.registry [default: REGISTRY_NAME] inventree worker image registry
+  ## @param workers.image.repository [default: REPOSITORY_NAME/inventree worker] inventree worker image repository
+  ## @skip workers.image.tag inventree worker image tag (immutable tags are recommended)
+  ## @param workers.image.digest inventree worker image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param workers.image.pullPolicy inventree worker image pull policy
+  ## @param workers.image.pullSecrets Specify docker-registry secret names as an array
+  ##
+  image:
+    registry: ""
+    repository: inventree/inventree
+    tag: 0.13.2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## E.g.:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Command and args for running the container (set to default if not set). Use array form
+  ## @param workers.command Override default container command (useful when using custom images)
+  ## @param workers.args Override default container args (useful when using custom images)
+  ##
+  command: []
+  args: []
+  ## @param workers.extraEnvVars Extra environment variables to be set on Inventree containers
+  ## E.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: BAR
+  ##
+  extraEnvVars: []
+  ## @param workers.extraEnvVarsCM ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM: ""
+  ## @param workers.extraEnvVarsSecret Secret with extra environment variables
+  ##
+  extraEnvVarsSecret: ""
+    ## inventree containers' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param workers.containerSecurityContext.enabled Enabled containers' Security Context
+  ## @param workers.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+  ## @param workers.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+  ## @param workers.containerSecurityContext.privileged Set container's Security Context privileged
+  ## @param workers.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+  ## @param workers.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+  ## @param workers.containerSecurityContext.capabilities.drop List of capabilities to be dropped
+  ## @param workers.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
+  ## inventree pods' Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param workers.podSecurityContext.enabled Enabled Inventree pods' Security Context
+  ## @param workers.podSecurityContext.fsGroup Set Inventree pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## @param workers.lifecycleHooks LifecycleHooks for the Inventree container to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+    ## @section Inventree RBAC parameters
+
+  ## ServiceAccount parameters
+  ##
+  serviceAccount:
+    ## @param workers.serviceAccount.create Specifies whether a ServiceAccount should be created
+    ##
+    create: false
+    ## @param workers.serviceAccount.name Override Inventree service account name
+    ## If not set and create is true, a name is generated using the fullname template
+    ##
+    name: ""
+    ## @param workers.serviceAccount.automountServiceAccountToken Allows auto mount of ServiceAccountToken on the serviceAccount created
+    ## Can be set to false if pods using this serviceAccount do not need to use K8s API
+    ##
+    automountServiceAccountToken: true
+    ## @param workers.serviceAccount.annotations Additional custom annotations for the ServiceAccount
+    ##
+    annotations: {}
+  ## RBAC resources
+  ##
+  rbac:
+    ## @param workers.rbac.create Specifies whether RBAC resources should be created
+    ##
+    create: false
+    ## @param workers.rbac.rules Custom RBAC rules to set
+    ## e.g:
+    ## rules:
+    ##   - apiGroups:
+    ##       - ""
+    ##     resources:
+    ##       - pods
+    ##     verbs:
+    ##       - get
+    ##       - list
+    ##
+    rules: []
+
+## @section Storage parameters
+
+## If deploying postgresql from this chart (see `postgresql.enabled`),
+## the username, password and database name for the `inventree` database needs to be configured in the respective sections.
+## If using an external database, the `inventree` database needs to be created manually and the credentials need to be configured here.
+## If using the built-in PostgreSQL, the `inventree` database will be created automatically.
+externalDatabase:
+  ## @param externalDatabase.enabled Set to true to use an external database
+  enabled: false
+
+  ## @param externalDatabase.type Type of the external database for inventree (`mysql`/`postgresql`/`sqlite3`)
+  ## Use `mysql` for MariaDB
+  type: ""
+
+  ## @param externalDatabase.host Hostname of the database
+  host: ""
+
+  ## @param externalDatabase.port Port of the database
+  port: 3306
+
+  ## @param externalDatabase.database Name of the database
+  database: inventree
+
+  ## @param externalDatabase.username Username to use for the database
+  username: inventree
+
+  ## @param externalDatabase.password Password to use for the database
+  password: ""
+
+  ## @param externalDatabase.existingSecret Name of the secret containing the database credentials
+  existingSecret: ""
+
+  ## @param externalDatabase.existingSecretDatabaseKey Key in the secret containing the database name
+  existingSecretDatabaseKey: "database"
+
+  ## @param externalDatabase.existingSecretUsernameKey Key in the secret containing the database username
+  existingSecretUsernameKey: "username"
+
+  ## @param externalDatabase.existingSecretPasswordKey Key in the secret containing the database password
+  existingSecretPasswordKey: "password"
+
+externalRedis:
+  ## @param externalRedis.enabled Set to true to use an external Redis instance (ignored if `redis.enabled` is true)
+  enabled: false
+
+  ## @param externalRedis.host Hostname of the external Redis instance
+  host: ""
+
+  ## @param externalRedis.port Port of the external Redis instance
+  port: 6379
+
+  ## @param externalRedis.adminQuotaDbId Redis database ID for the quota storage on the admin pod
+  adminQuotaDbId: 1
+
+  ## @param externalRedis.adminRateLimitDbId Redis database ID for the rate limit storage on the admin pod
+  adminRateLimitDbId: 2
+
+  ## @param externalRedis.rspamdDbId Redis database ID for the rspamd storage on the rspamd pod
+  ## Changing this value does nothing as the option is not configurable in rspamd pod yet
+  ## ref: https://rspamd.com/doc/configuration/redis.html#available-redis-options
+  rspamdDbId: 0
+
+## @section  PostgreSQL parameters
+## PostgreSQL chart configuration
+##
+postgresql:
+  ## @param postgresql.enabled Enable PostgreSQL deployment
+  enabled: true
+
+  ## @param postgresql.architecture PostgreSQL architecture. Allowed values: standalone or replication
+  architecture: standalone
+  ## Bitnami PostgreSQL image version
+  ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
+  ## @param postgresql.image.registry [default: REGISTRY_NAME] PostgreSQL image registry
+  ## @param postgresql.image.repository [default: REPOSITORY_NAME/postgresql] PostgreSQL image repository
+  ## @skip postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
+  ## @param postgresql.image.digest PostgreSQL image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param postgresql.image.pullPolicy PostgreSQL image pull policy
+  ## @param postgresql.image.pullSecrets Specify image pull secrets
+  ## @param postgresql.image.debug Specify if debug values should be set
+  ##
+  image:
+    registry: ""
+    repository: bitnami/postgresql
+    tag: 13.13.0-debian-11-r22
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## Example:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+    ## Set to true if you would like to see extra information on logs
+    ##
+    debug: false
+
+  ## @param postgresql.auth.enablePostgresUser Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user
+  ## @param postgresql.auth.postgresPassword Password for the "postgres" admin user. Ignored if `auth.existingSecret` with key `postgres-password` is provided
+  ## @param postgresql.auth.username Name for a custom user to create
+  ## @param postgresql.auth.password Password for the custom user to create. Ignored if `auth.existingSecret` with key `password` is provided
+  ## @param postgresql.auth.database Name for a custom database to create
+  ## @param postgresql.auth.existingSecret Use existing secret for password details (`auth.postgresPassword`, `auth.password` will be ignored and picked up from this secret). The secret has to contain the keys `postgres-password` and `password`
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+    username: inventree
+    password: superSecretPassword!
+    database: inventree
+    existingSecret: ""
+
+    ## @param postgresql.auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    ## @param postgresql.auth.secretKeys.userPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    ## @param postgresql.auth.secretKeys.replicationPasswordKey Name of key in existing secret to use for PostgreSQL credentials. Only used when `auth.existingSecret` is set.
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+      replicationPasswordKey: replication-password
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  primary:
+    ## @skip postgresql.primary.extraEnvVars
+    ## Array with extra environment variables, used to create the initial `roundcube` database; DO NOT EDIT; see `global.database` instead
+    extraEnvVars: []
+
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: app.env/inventree
+                  operator: In
+                  values:
+                    - 'true'
+
+    initdb:
+      ## @skip postgresql.primary.initdb.scripts
+      ## DO NOT EDIT Script to create the roundcube database
+      scripts: {}
+
+    persistence:
+      ## @param postgresql.primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+      ##
+      enabled: true
+      ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
+      ##
+      existingClaim: ""
+      ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      storageClass: ""
+      ## @param postgresql.primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+      ##
+      accessModes:
+        - ReadWriteOnce
+      ## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
+      ##
+      size: 8Gi
+      ## @param postgresql.primary.persistence.annotations Annotations for the PVC
+      ##
+      annotations: {}
+      ## @param postgresql.primary.persistence.labels Labels for the PVC
+      ##
+      labels: {}
+      ## @param postgresql.primary.persistence.selector Selector to match an existing Persistent Volume (this value is evaluated as a template)
+      ## selector:
+      ##   matchLabels:
+      ##     app: my-app
+      ##
+      selector: {}
+      ## @param postgresql.primary.persistence.dataSource Custom PVC data source
+      ##
+      dataSource: {}
+
+## @section Redis parameters
+## Redis chart configuration
+## for more options see https://github.com/bitnami/charts/tree/master/bitnami/redis
+redis:
+  ## @param redis.enabled Enable redis deployment through the redis subchart
+  enabled: true
+
+  ## @param redis.architecture Redis architecture. Allowed values: `standalone` or `replication`
+  architecture: standalone
+
+  ## @param redis.auth.enabled DON'T CHANGE THIS VALUE. Mailu doesn't support Redis authentication
+  auth:
+    enabled: false
+
+  master:
+    ## @param redis.master.enabled DON'T CHANGE THIS VALUE. Enable redis master
+    enabled: true
+
+    ## @param redis.master.count Number of redis master replicas
+    count: 1
+    ## @param affinity
+    ##
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: app.env/inventree
+                  operator: In
+                  values:
+                    - 'true'
+
+    ## @param redis.master.persistence.enabled Enable persistence using Persistent Volume Claims
+    ## @param redis.master.persistence.size Pod pvc size
+    ## @param redis.master.persistence.storageClass Pod pvc storage class
+    ## @param redis.master.persistence.accessModes Pod pvc access modes
+    ## @param redis.master.persistence.annotations Pod pvc annotations
+    ## @param redis.master.persistence.existingClaim Pod pvc existing claim; necessary if using single_pvc
+    ## @param redis.master.persistence.subPath Subpath in PVC; necessary if using single_pvc (set it to `/redis`)
+    persistence:
+      enabled: true
+      size: 2Gi
+      storageClass: ""
+      accessModes: [ReadWriteOnce]
+      existingClaim: ""
+      subPath: ""
+      annotations: {}
+
+  ## @param redis.replica.count Number of redis replicas (only if `redis.architecture=replication`)
+  ## Don't forget to configure replicas persistence if changing this value
+  replica:
+    count: 0
+
+  ## @param redis.image.registry [default: REGISTRY_NAME] Redis&reg; image registry
+  ## @param redis.image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
+  ## @param redis.image.tag Redis&reg; image tag (immutable tags are recommended)
+  ## @param redis.image.digest Redis&reg; image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param redis.image.pullPolicy Redis&reg; image pull policy
+  ## @param redis.image.pullSecrets Redis&reg; image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.2.4-debian-11-r2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+    ## @param redis.master.initContainers Add additional init containers to the Inventree pods
+    ## Example:
+    ## initContainers:
+    ##   - name: your-image-name
+    ##     image: your-image
+    ##     imagePullPolicy: Always
+    ##     ports:
+    ##       - name: portname
+    ##         containerPort: 1234
+    ##
+    initContainers: []
+
+## @section Proxy parameters
+## Nginx Proxy configuration
+##
+proxy:
+  ## @param proxy.enabled Enable nginx proxy through nginx subchart. 
+  ##
+  enabled: true
+  ## @param proxy.nameOverride String to partially override nginx.fullname template (will maintain the release name)
+  ##
+  nameOverride: ""
+  ## @param proxy.fullnameOverride String to fully override nginx.fullname template
+  ##
+  fullnameOverride: ""
+  ## @param proxy.namespaceOverride String to fully override common.names.namespace
+  ##
+  namespaceOverride: ""
+  ## @param proxy.kubeVersion Force target Kubernetes version (using Helm capabilities if not set)
+  ##
+  kubeVersion: ""
+  ## @param proxy.clusterDomain Kubernetes Cluster Domain
+  ##
+  clusterDomain: cluster.local
+  ## @param proxy.extraDeploy Extra objects to deploy (value evaluated as a template)
+  ##
+  extraDeploy: []
+  ## @param proxy.commonLabels Add labels to all the deployed resources
+  ##
+  commonLabels: {}
+  ## @param proxy.commonAnnotations Add annotations to all the deployed resources
+  ##
+  commonAnnotations: {}
+  ## @param proxy.replicaCount Number of NGINX replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param proxy.image.registry [default: REGISTRY_NAME] NGINX image registry
+  ## @param proxy.image.repository [default: REPOSITORY_NAME/nginx] NGINX image repository
+  ## @skip proxy.image.tag NGINX image tag (immutable tags are recommended)
+  ## @param proxy.image.digest NGINX image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+  ## @param proxy.image.pullPolicy NGINX image pull policy
+  ## @param proxy.image.pullSecrets Specify docker-registry secret names as an array
+  ##
+  image:
+    registry: ""
+    repository: bitnami/nginx
+    tag: 1.25.3-debian-11-r4
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## E.g.:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param proxy.extraEnvVars Extra environment variables to be set on NGINX containers
+  ## E.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: BAR
+  ##
+  extraEnvVars: []
+  ## @param proxy.extraEnvVarsCM ConfigMap with extra environment variables
+  ##
+  extraEnvVarsCM: ""
+  ## @param proxy.extraEnvVarsSecret Secret with extra environment variables
+  ##
+  extraEnvVarsSecret: ""
+  ## @param proxy.podLabels Additional labels for NGINX pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param proxy.podAnnotations Annotations for NGINX pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param proxy.podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param proxy.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node affinity preset
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param proxy.nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param proxy.nodeAffinityPreset.key Node label key to match Ignored if `affinity` is set.
+    ## E.g.
+    ## key: "kubernetes.io/e2e-az-name"
+    ##
+    key: ""
+    ## @param proxy.nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param proxy.affinity Affinity for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+  ##
+  affinity: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: app.env/inventree
+                operator: In
+                values:
+                  - 'true'
+
+  ## @param proxy.extraVolumes Array to add extra volumes
+  ##
+  extraVolumes: 
+    - name: data
+      persistentVolumeClaim:
+        claimName: inventree-data
+  ## @param proxy.extraVolumeMounts Array to add extra mount
+  ##
+  extraVolumeMounts: 
+    - name: data
+      mountPath: /var/www
+  ## @param proxy.serverBlock Custom server block to be added to NGINX configuration
+  ## PHP-FPM example server block:
+  ## serverBlock: |-
+  ##   server {
+  ##     listen 0.0.0.0:8080;
+  ##     root /app;
+  ##     location / {
+  ##       index index.html index.php;
+  ##     }
+  ##     location ~ \.php$ {
+  ##       fastcgi_pass phpfpm-server:9000;
+  ##       fastcgi_index index.php;
+  ##       include fastcgi.conf;
+  ##     }
+  ##   }
+  ##
+  serverBlock: ""
+  ## @param proxy.existingServerBlockConfigmap ConfigMap with custom server block to be added to NGINX configuration
+  ## NOTE: This will override serverBlock
+  ##
+  existingServerBlockConfigmap: inventree-proxy-prod-conf
+  ## @param proxy.staticSiteConfigmap Name of existing ConfigMap with the server static site content
+  ##
+  staticSiteConfigmap: ""
+  ## @param proxy.staticSitePVC Name of existing PVC with the server static site content
+  ## NOTE: This will override staticSiteConfigmap
+  ##
+  staticSitePVC: ""
+
+  dnsResolver: "10.152.183.10"
+
+  ## @section Traffic Exposure parameters
+
+  ## NGINX Service properties
+  ##
+  service:
+    ## @param proxy.service.type Service type
+    ##
+    type: LoadBalancer
+    ## @param proxy.service.ports.http Service HTTP port
+    ## @param proxy.service.ports.https Service HTTPS port
+    ##
+    ports:
+      http: 80
+      https: 443
+    ##
+    ## @param proxy.service.nodePorts [object] Specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    ##
+    nodePorts:
+      http: ""
+      https: ""
+    ## @param proxy.service.targetPort [object] Target port reference value for the Loadbalancer service types can be specified explicitly.
+    ## Listeners for the Loadbalancer can be custom mapped to the http or https service.
+    ## Example: Mapping the https listener to targetPort http [http: https]
+    ##
+    targetPort:
+      http: http
+      https: https
+    ## @param proxy.service.clusterIP NGINX service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP: ""
+    ## @param proxy.service.loadBalancerIP LoadBalancer service IP address
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+    ##
+    loadBalancerIP: ""
+    ## @param proxy.service.loadBalancerSourceRanges NGINX service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param proxy.service.loadBalancerClass service Load Balancer class if service type is `LoadBalancer` (optional, cloud specific)
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerClass: ""
+    ## @param proxy.service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
+    ##
+    extraPorts: []
+    ## @param proxy.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+    ## If "ClientIP", consecutive client requests will be directed to the same Pod
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+    ##
+    sessionAffinity: None
+    ## @param proxy.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
+    ## @param proxy.service.annotations Service annotations
+    ## This can be used to set the LoadBalancer service type to internal only.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+    ##
+    annotations: {}
+    ## @param proxy.service.externalTrafficPolicy Enable client source IP preservation
+    ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Local
+
+
+
+
+
+
+
+
+
+

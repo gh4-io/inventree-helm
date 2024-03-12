@@ -1,0 +1,42 @@
+apiVersion: v2
+name: inventree
+description: "Open-source Inventory Management System"
+type: application
+version: 0.1.0
+appVersion: 0.14.1
+keywords:
+  - inventree
+  - asset
+  - management
+  - inventory
+  - web
+sources:
+  - https://github.com/inventree/InvenTree
+  - https://gitlab.com/playground254/inventree-home
+maintainers:
+  - name: jason
+    email: helmcharts@gh4.io
+dependencies: 
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+  - name: postgresql
+    condition: postgresql.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 13.x.x
+  - name: redis
+    condition: redis.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 18.x.x
+  - name: nginx 
+    condition: proxy.enabled
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 15.x.x
+    alias: proxy
+
+home: https://gitlab.com/playground254/inventree-home
+icon: https://raw.githubusercontent.com/inventree/InvenTree/master/images/logo/inventree.png
+kubeVersion: ">=1.16.0-0"
+annotations: {}

@@ -28,7 +28,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 
 
-{{- if .Values.proxy.ingress.enabled }}
+{{- if and .Values.proxy.enabled .Values.proxy.ingress.enabled }}
 
 1. Get the inventree URL indicated on the Ingress Rule and associate it to your cluster external IP:
 

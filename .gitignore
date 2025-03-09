@@ -7,3 +7,4 @@
 .vscode/
 inventree/Charts/*
 .gitignore
+**/Chart.lock

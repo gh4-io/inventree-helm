@@ -33,7 +33,7 @@ dependencies:
   - name: nginx 
     condition: proxy.enabled
     repository: oci://registry-1.docker.io/bitnamicharts
-    version: 15.x.x
+    version: 18.x.x
     alias: proxy
 
 home: https://gitlab.com/playground254/inventree-home
